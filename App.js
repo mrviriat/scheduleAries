@@ -5,6 +5,10 @@ import { TransitionPresets, createStackNavigator } from '@react-navigation/stack
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import {
+  SharedElement,
+  createSharedElementStackNavigator,
+} from 'react-navigation-shared-element';
 import { LogBox } from 'react-native';
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state.',
@@ -14,7 +18,9 @@ import { AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 // ЭЛЕМЕНТЫ ИЗ МОИХ ФАЙЛОВ
 import MainNavigator from './MainNavigator';
-
+import DetailScreen from './DetailScreen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { TransitionSpecs } from '@react-navigation/stack';
 function Modal({ route, navigation }) {
 
   const input = useRef(null); //ссылка на поле с логином
@@ -48,11 +54,12 @@ function Modal({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      <Pressable style={{paddingLeft: responsiveWidth(2.5), paddingTop: responsiveWidth(2.5)}} onPress={() => navigation.navigate("MainNavigator")}>
+      <Pressable style={{ paddingLeft: responsiveWidth(2.5), paddingTop: responsiveWidth(2.5) }} onPress={() => navigation.navigate("MainNavigator")}>
         <AntDesign name="back" size={responsiveHeight(3.9)} color="black" />
       </Pressable>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+      {/* <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ justifyContent: 'center', alignItems: 'center', }> */}
+
+        <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: responsiveHeight(25)  }}>
           <FontAwesome5 name="user-graduate" size={responsiveHeight(10)} color="black" />
           <View>
             <Text style={{ paddingLeft: responsiveWidth(1), fontSize: responsiveFontSize(2.67) }}>ваш логин</Text>
@@ -83,10 +90,11 @@ function Modal({ route, navigation }) {
               }}
               autoCapitalize='none' />
           </View>
+
         </View>
+      {/* </KeyboardAvoidingView> */}
 
 
-      </KeyboardAvoidingView>
     </View>
   );
   // return (
@@ -95,41 +103,96 @@ function Modal({ route, navigation }) {
   //   </View>
   // );
 }
+// const RootStack = createStackNavigator();
+const RootStack = createSharedElementStackNavigator();
 
 export default function App() {
+  const transition = {
+    // gestureDirection: "vertical",
+    transitionSpec: {
+      open: {
+        animation: "timing",
+        config: {
+          duration: 400,
+        },
+      },
+      close: {
+        animation: 'timing',
+        config: {
+          duration: 350,
+        },
+      },
+    },
+    // cardStyleInterpolator: ({ current: { progress } }) => {
+    //   return {
+    //     cardStyle: {
+    //       opacity: progress,
+    //     },
+    //   };
+    // },
+  };
 
-  const RootStack = createStackNavigator();
 
   return (
+
     <NavigationContainer>
       <RootStack.Navigator
         initialRouteName="MainNavigator"
-        screenOptions={({ route }) => {
-          return {
-            gestureEnabled: true,
-            cardOverlayEnabled: true,
-            ...TransitionPresets.ModalPresentationIOS,
-          };
-        }}
-        mode="modal"
-        headerMode="none"
-      >
+      // screenOptions={({ route }) => {
+      //   return {
+      //     headerMode: "none",
+      //     gestureEnabled: true,
+      //     cardOverlayEnabled: true,
+      //     ...TransitionPresets.ModalPresentationIOS,
+      //   };
+      // }}
+      // mode="modal"
 
+
+
+      // initialRouteName="MainNavigator"
+      // screenOptions={{
+      //   headerShown: false,
+      //   // headerTransparent: true,
+      //   // title: '',
+      //   // headerTintColor: 'black',
+      // }}
+      >
         <RootStack.Screen
           name="MainNavigator"
           component={MainNavigator}
-        // options={() => {
-        //   return {
-        //     headerShown: false,
-        //   };
-        // }}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Screen
+          name="Detail"
+          component={DetailScreen}
+          options={{
+            gestureEnabled: false,
+            headerShown: false,
+            transitionSpec: transition.transitionSpec,
+            // cardStyleInterpolator: transition.cardStyleInterpolator
+          }}
+          sharedElements={(route, otherRoute, showing) => {
+            const { item, index } = route.params;
+            return [{ id: `item.${item.id}`, animation: 'fade' }];
+          }}
         />
         <RootStack.Screen
           name="Modal"
           component={Modal}
+          options={() => {
+            return {
+              headerShown: false,
+              gestureEnabled: true,
+              cardOverlayEnabled: true,
+              ...TransitionPresets.ModalPresentationIOS,
+            };
+          }}
         />
+
       </RootStack.Navigator>
     </NavigationContainer>
+
   );
 }
 

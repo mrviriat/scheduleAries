@@ -1,10 +1,9 @@
 
 import { useState, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, SafeAreaView, Platform , StatusBar} from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform , SafeAreaView, StatusBar} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
-
 export default function StudentsList_screen({ studentsList, setStudents }) {
 
     let [fontsLoaded] = useFonts({
@@ -51,13 +50,42 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
     const [NewStudent, setValue] = useState(true);
     const [ChangedIndex, setChangedIndex] = useState();
 
+    const Student = ({ item, index }) => (
+        <TouchableOpacity style={[styles.item,
+            {
+                borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
+                borderColor: 'black',
+                borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+                borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+                borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
+                borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0
+            }]}
+                onLongPress={() => dell_Srudent(index)}
+                delayLongPress={1000}
+                onPress={() => {
+                    ref.current?.focus();
+                    setChangedStudent(item.name);
+                    setChangedIndex(index);
+                    setValue(false);
+                }
+                }
+            >
+                <Text style={styles.text}>{index + 1}. </Text>
+                <Text style={styles.text}>{item.name} </Text>
+            </TouchableOpacity >
+    );
+    const renderStudent = ({ item, index }) => {
+        return (
+            <Student item={item}  index={index} />
+        );
+    };
+
     if (!fontsLoaded) {
         return null;
     };
 
     return (
         <SafeAreaView style={styles.AndroidSafeArea}>
-            {/* <StatusBar barStyle="dark-content" backgroundColor='#fff' /> */}
             <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
                 <Text style={[styles.text, { marginBottom: responsiveHeight(1.77) }]}>
                     Cписок учебной группы🐥
@@ -80,30 +108,7 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                     data={studentsList}
                     keyExtractor={(item, index) => item.name + index.toString()}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({ item, index }) =>
-                        <TouchableOpacity style={[styles.item,
-                        {
-                            borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
-                            borderColor: 'black',
-                            borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-                            borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-                            borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
-                            borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0
-                        }]}
-                            onLongPress={() => dell_Srudent(index)}
-                            delayLongPress={1000}
-                            onPress={() => {
-                                ref.current?.focus();
-                                setChangedStudent(item.name);
-                                setChangedIndex(index);
-                                setValue(false);
-                            }
-                            }
-                        >
-                            <Text style={styles.text}>{index + 1}. </Text>
-                            <Text style={styles.text}>{item.name} </Text>
-                        </TouchableOpacity >
-                    }
+                    renderItem={renderStudent}
                 />
             </View>
         </SafeAreaView>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef, memo } from 'react';
 import { Pressable, StyleSheet, Platform, StatusBar, Text, View, FlatList, TouchableOpacity, Alert, Animated, SafeAreaView, Dimensions, Easing } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
@@ -8,10 +8,27 @@ import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-nat
 import getDay from 'date-fns/getDay';
 import isEqual from 'date-fns/isEqual';
 import axios from 'axios';
+import 'react-native-get-random-values'
+import { nanoid } from 'nanoid'
 import { FontAwesome } from '@expo/vector-icons';
 import { Entypo } from '@expo/vector-icons';
+import { SharedElement } from 'react-navigation-shared-element';
+import { useNavigation } from '@react-navigation/native';
+import FlashList from '@shopify/flash-list';
+import { customAlphabet } from 'nanoid/non-secure';
+import { v4 as uuidv4 } from 'uuid';
 
-function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE, setSchedule_data, navigation }, ref) {
+Text.defaultProps = Text.defaultProps || {}; //Disable dynamic type in IOS
+Text.defaultProps.allowFontScaling = false;
+
+
+function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE, setSchedule_data }, ref) {
+
+    const navigation = useNavigation();
+
+
+    const flatListRef = useRef(null);
+
 
     let [fontsLoaded] = useFonts({
         Inter_400Regular,
@@ -88,7 +105,35 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
         try {
             const jsonValue = await AsyncStorage.getItem('@storage_Key')
             if (jsonValue != null) {
-                setCH(JSON.parse(jsonValue))
+                let oldCH = JSON.parse(jsonValue);
+
+                //тут я буду делать функцию которая должна произойти только один раз 
+
+                try {
+                    console.log("я тут")
+                    const isFirstLaunch = await AsyncStorage.getItem('isFirst');
+                    if (!isFirstLaunch) {
+                        console.log("я теперь тут")
+                        for (let i = 0; i < 7; i++) { // выведет 0, затем 1, затем 2
+                            oldCH[i].ID = nanoid();
+                            for (let j = 0; j < oldCH[i].lessons.length; j++) { // выведет 0, затем 1, затем 2
+                                oldCH[i].lessons[j].id = nanoid();
+                            }
+                        }
+
+                        // вызов функции, которую нужно запустить только один раз
+                        await AsyncStorage.setItem('isFirst', 'true');
+                        storeData(oldCH)
+                        console.log("сохранил действие, которое больше выполняться не будет")
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+
+                //закончил этот блок
+
+
+                setCH(oldCH)
             } else {
                 setCH(
                     date.map(item => ({
@@ -163,8 +208,10 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
 
                         try {
                             const jsonValue = await AsyncStorage.getItem('@lastDay')
-                            console.log('я прочитал lastDay');
+                            console.log('я прочитал lastDay: ' + JSON.parse(jsonValue));
+                            console.log("selectedId : " + selectedId)
                             if (JSON.parse(jsonValue) != selectedId) {
+                                console.log('захожу в getUserInfo');
                                 await getUserInfo(InUser, selectedId);
                                 console.log('я обновил сегодняшний день');
 
@@ -181,7 +228,8 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
                                 await getData();
                             }
                         } catch (e) {
-                            console.log('ошибка чтения lastDay')
+                            console.log('ошибка чтения lastDay вот тут')
+
                         }
                     }
                 } catch (e) {
@@ -231,17 +279,78 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
 
     const weekForNewUser = async (userLogin) => { //обновление недели для новго юзера
         console.log('начинаю обновлять всю неделю для новго юзера');
-        let oldCH;
+        let oldCH = [];
         try {
+            await AsyncStorage.removeItem('@storage_Key');
+            console.log('Значение успешно удалено из @storage_Key');
             const jsonValue = await AsyncStorage.getItem('@storage_Key')
             if (jsonValue != null) {
                 oldCH = JSON.parse(jsonValue);
+
+                //тут я буду делать функцию которая должна произойти только один раз 
+
+                try {
+                    console.log("я проверяю уникальную ункцию")
+                    await AsyncStorage.removeItem("isFirst");
+                    console.log('Значение успешно удалено из AsyncStorage');
+                    const isFirstLaunch = await AsyncStorage.getItem('isFirst');
+                    if (!isFirstLaunch) {
+                        console.log("я выполняю уникальную ункцию")
+                        for (let i = 0; i < 7; i++) {
+                            let a;
+                            try {
+                                a = nanoid();
+                            } catch
+                            {
+                                a = `selID-${i}.`;
+                            }
+
+                            oldCH[i].ID = a;
+                            if (i != 6) {
+                                for (let j = 0; j < oldCH[i].lessons.length; j++) { // выведет 0, затем 1, затем 2
+                                    try {
+                                        oldCH[i].lessons[j].id = nanoid();
+                                    } catch {
+                                        oldCH[i].lessons[j].id = `selID-${i}less-${j}`;
+                                    }
+                                }
+
+
+                            }
+                        }
+                        console.log("я теперь тут уже")
+                        // вызов функции, которую нужно запустить только один раз
+                        await AsyncStorage.setItem('isFirst', 'true');
+                        storeData(oldCH)
+                        console.log("сохранил действие, которое больше выполняться не будет")
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+
+                //закончил этот блок
+
             }
             else {
-                oldCH = date.map(item => ({
-                    day: item,
-                    lessons: []
-                }));
+                console.log("буду делать новый шаблон")
+                for (let i = 0; i < 7; i++) { // выведет 0, затем 1, затем 2
+                    try {
+                        oldCH = [...oldCH, {
+                            day: date[i],
+                            lessons: [],
+                            ID: nanoid()
+                        }];
+                    } catch
+                    {
+                        oldCH = [...oldCH, {
+                            day: date[i],
+                            lessons: [],
+                            ID: `selID-${i}.`
+                        }];
+                    }
+
+                }
+                console.log("я справился")
             };
             console.log('я прочитал старое расписание для обновления недели')
         } catch (e) {
@@ -249,32 +358,65 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
         }
 
         let { data: { days } } = await axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${userLogin.k_sgryp}&dateStart=${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}&dateEnd=${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}&lang=ru_RU`);
-
+        console.log("я тут 0");
         let st = [];
         try {
             const jsonValue = await AsyncStorage.getItem('@stu')
             if (jsonValue != null) {
                 st = JSON.parse(jsonValue);
                 console.log('я прочитал студентов для обновления недели');
+
             }
         } catch (e) {
             console.log('ошибка чтения')
         }
+
+
         for (let index = 0; index < 6; index++) {
-            let changeble = days[index].lessons.filter(lesson => lesson.title != "Физическая культура").map(lesson => (
+
+            console.log("я вошёл в changeble");
+            days[index].lessons = days[index].lessons.filter(lesson => lesson.title != "Физическая культура");
+            let changeble = [];
+
+            for (let i = 0; i < days[index].lessons.length; i++) {
+                let a;
+                try {
+                    a = nanoid();
+                } catch
                 {
-                    name: lesson.title,
-                    timeStart: lesson.timeStart,
-                    timeEnd: lesson.timeEnd,
-                    type: lesson.type,
-                    students: st,
+                    a = `selID-${index}less-${i}`;
                 }
-            ))
+                // console.log(a)
+                changeble = [...changeble, {
+                    name: days[index].lessons[i].title,
+                    timeStart: days[index].lessons[i].timeStart,
+                    timeEnd: days[index].lessons[i].timeEnd,
+                    type: days[index].lessons[i].type,
+                    students: st,
+                    id: a,
+                }]
+                console.log(`сделал ${i + 1} пару`)
+            }
+
+            console.log("я вышел из changeble");
             oldCH[index].lessons = changeble;
+            console.log(`сделал ${index + 1} день`)
         }
+
+
         for (let i = 0; i < 7; i++) { // выведет 0, затем 1, затем 2
+            let a;
+            try {
+                a = nanoid();
+            } catch
+            {
+                a = `selID-${i}.`;
+            }
+
             oldCH[i].day = date[i];
+            oldCH[i].ID = a;
         }
+
         setCH(JSON.parse(JSON.stringify(oldCH)));
         storeData(oldCH);
         const jsonCurrentWeek = JSON.stringify(date);
@@ -285,17 +427,76 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
     };
 
     const getUserWeek = async (userLogin) => { //обновление недели
-        let oldCH;
+        let oldCH = [];
         try {
             const jsonValue = await AsyncStorage.getItem('@storage_Key')
             if (jsonValue != null) {
                 oldCH = JSON.parse(jsonValue);
+
+
+
+                //тут я буду делать функцию которая должна произойти только один раз 
+
+                try {
+                    console.log("я проверяю уникальную ункцию")
+                    const isFirstLaunch = await AsyncStorage.getItem('isFirst');
+                    if (!isFirstLaunch) {
+                        console.log("я выполняю уникальную ункцию")
+                        for (let i = 0; i < 7; i++) {
+                            let a;
+                            try {
+                                a = nanoid();
+                            } catch
+                            {
+                                a = `selID-${i}.`;
+                            }
+
+                            oldCH[i].ID = a;
+                            if (i != 6) {
+                                for (let j = 0; j < oldCH[i].lessons.length; j++) { // выведет 0, затем 1, затем 2
+                                    try {
+                                        oldCH[i].lessons[j].id = nanoid();
+                                    } catch {
+                                        oldCH[i].lessons[j].id = `selID-${i}less-${j}`;
+                                    }
+                                }
+
+
+                            }
+                        }
+                        console.log("я теперь тут уже")
+                        // вызов функции, которую нужно запустить только один раз
+                        await AsyncStorage.setItem('isFirst', 'true');
+                        storeData(oldCH)
+                        console.log("сохранил действие, которое больше выполняться не будет")
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+
+                //закончил этот блок
+
+
+
             }
             else {
-                oldCH = date.map(item => ({
-                    day: item,
-                    lessons: []
-                }));
+                for (let i = 0; i < 7; i++) { // выведет 0, затем 1, затем 2
+                    try {
+                        oldCH = [...oldCH, {
+                            day: date[i],
+                            lessons: [],
+                            ID: nanoid()
+                        }];
+                    } catch
+                    {
+                        oldCH = [...oldCH, {
+                            day: date[i],
+                            lessons: [],
+                            ID: `selID-${i}.`
+                        }];
+                    }
+
+                }
             };
             console.log('я прочитал старое расписание для обновления недели');
         } catch (e) {
@@ -316,38 +517,152 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
         } catch (e) {
             console.log('ошибка чтения')
         }
+
+
         for (let index = 0; index < 6; index++) {
-            let changeble = days[index].lessons.filter(lesson => lesson.title != "Физическая культура").map(lesson => (
+
+            console.log("я вошёл в changeble");
+            days[index].lessons = days[index].lessons.filter(lesson => lesson.title != "Физическая культура");
+            let changeble = [];
+
+            for (let i = 0; i < days[index].lessons.length; i++) {
+                let a;
+                try {
+                    a = nanoid();
+                } catch
                 {
-                    name: lesson.title,
-                    timeStart: lesson.timeStart,
-                    timeEnd: lesson.timeEnd,
-                    type: lesson.type,
-                    students: st,
+                    a = `selID-${index}less-${i}`;
                 }
-            ))
+                // console.log(a)
+                changeble = [...changeble, {
+                    name: days[index].lessons[i].title,
+                    timeStart: days[index].lessons[i].timeStart,
+                    timeEnd: days[index].lessons[i].timeEnd,
+                    type: days[index].lessons[i].type,
+                    students: st,
+                    id: a,
+                }]
+                console.log(`сделал ${i + 1} пару`)
+            }
+
+            console.log("я вышел из changeble");
             oldCH[index].lessons = changeble;
+            console.log(`сделал ${index + 1} день`)
         }
+
+        // for (let index = 0; index < 6; index++) {
+        //     let changeble = days[index].lessons.filter(lesson => lesson.title != "Физическая культура").map(lesson => (
+        //         {
+        //             name: lesson.title,
+        //             timeStart: lesson.timeStart,
+        //             timeEnd: lesson.timeEnd,
+        //             type: lesson.type,
+        //             students: st,
+        //             id: nanoid()
+        //         }
+        //     ))
+        //     oldCH[index].lessons = changeble;
+        // }
         for (let i = 0; i < 7; i++) { // выведет 0, затем 1, затем 2
+            let a;
+            try {
+                a = nanoid();
+            } catch
+            {
+                a = `selID-${i}.`;
+            }
             oldCH[i].day = date[i];
+            oldCH[i].ID = a;
         }
         setCH(JSON.parse(JSON.stringify(oldCH)));
         storeData(oldCH);
     };
 
     const getUserInfo = async (userLogin, selectedId) => { //обновление одного дня
-        let oldCH;
+        let oldCH = [];
         try {
             const jsonValue = await AsyncStorage.getItem('@storage_Key')
             if (jsonValue != null) {
                 oldCH = JSON.parse(jsonValue);
+
+
+                //тут я буду делать функцию которая должна произойти только один раз 
+
+                try {
+                    console.log("я проверяю уникальную ункцию")
+                    const isFirstLaunch = await AsyncStorage.getItem('isFirst');
+                    if (!isFirstLaunch) {
+                        console.log("я выполняю уникальную ункцию")
+                        for (let i = 0; i < 7; i++) {
+                            let a;
+                            try {
+                                a = nanoid();
+                            } catch
+                            {
+                                a = `selID-${i}.`;
+                            }
+
+                            oldCH[i].ID = a;
+                            if (i != 6) {
+                                for (let j = 0; j < oldCH[i].lessons.length; j++) { // выведет 0, затем 1, затем 2
+                                    try {
+                                        oldCH[i].lessons[j].id = nanoid();
+                                    } catch {
+                                        oldCH[i].lessons[j].id = `selID-${i}less-${j}`;
+                                    }
+                                }
+
+
+                            }
+                        }
+                        console.log("я теперь тут уже")
+                        // вызов функции, которую нужно запустить только один раз
+                        await AsyncStorage.setItem('isFirst', 'true');
+                        storeData(oldCH)
+                        console.log("сохранил действие, которое больше выполняться не будет")
+                    }
+                } catch (error) {
+                    console.log(error);
+                }
+
+                //закончил этот блок
+
+
+
             }
             else {
-                oldCH = date.map(item => ({
-                    day: item,
-                    lessons: []
-                })
-                );
+
+                for (let i = 0; i < 7; i++) { // выведет 0, затем 1, затем 2
+                    try {
+                        oldCH = [...oldCH, {
+                            day: date[i],
+                            lessons: [],
+                            ID: nanoid()
+                        }];
+                    } catch
+                    {
+                        oldCH = [...oldCH, {
+                            day: date[i],
+                            lessons: [],
+                            ID: `selID-${i}.`
+                        }];
+                    }
+
+                }
+                // try {
+                //     oldCH = date.map(item => ({
+                //         day: item,
+                //         lessons: [],
+                //         ID: nanoid()
+                //     }));
+                // }
+                // catch {
+                //     oldCH = date.map(item => ({
+                //         day: item,
+                //         lessons: [],
+                //         ID: uuidv4()
+                //     }));
+                // }
             }
             console.log('я прочитал старое расписание для обновления одного дня')
         } catch (e) {
@@ -367,30 +682,115 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
         } catch (e) {
             console.log('ошибка чтения')
         }
-        let changeble = days[selectedId].lessons.filter(lesson => lesson.title != "Физическая культура").map(lesson => (
-            {
-                name: lesson.title,
-                timeStart: lesson.timeStart,
-                timeEnd: lesson.timeEnd,
-                type: lesson.type,
-                students: st,
+        if (days[selectedId]) {
+            // console.log("я вошёл в changeble");
+            // let changeble = days[selectedId].lessons.filter(lesson => lesson.title != "Физическая культура").map(lesson => (
+            //     {
+            //         name: lesson.title,
+            //         timeStart: lesson.timeStart,
+            //         timeEnd: lesson.timeEnd,
+            //         type: lesson.type,
+            //         students: st,
+            //         id: nanoid()
+            //     }
+
+            // ))
+
+
+            console.log("я вошёл в changeble");
+            days[selectedId].lessons = days[selectedId].lessons.filter(lesson => lesson.title != "Физическая культура");
+            let changeble = [];
+            console.log(days[selectedId].lessons.length)
+            for (let i = 0; i < days[selectedId].lessons.length; i++) {
+                let a;
+                try {
+                    a = nanoid();
+                } catch
+                {
+                    a = `selID-${selectedId}less-${i}`;
+                }
+                console.log(a)
+                changeble = [...changeble, {
+                    name: days[selectedId].lessons[i].title,
+                    timeStart: days[selectedId].lessons[i].timeStart,
+                    timeEnd: days[selectedId].lessons[i].timeEnd,
+                    type: days[selectedId].lessons[i].type,
+                    students: st,
+                    id: a,
+                }]
+                console.log(`сделал ${i + 1} пару`)
             }
-        ))
-        if (oldCH[selectedId].lessons != JSON.parse(JSON.stringify(changeble))) {
-            oldCH[selectedId].lessons = JSON.parse(JSON.stringify(changeble));
+
+            console.log("я вышел из changeble");
+            oldCH[selectedId].lessons = changeble;
+            console.log("я изменил день");
+
+            if (oldCH[selectedId].lessons != JSON.parse(JSON.stringify(changeble))) {
+                oldCH[selectedId].lessons = JSON.parse(JSON.stringify(changeble));
+                setCH(oldCH);
+                storeData(oldCH);
+            } else {
+                setCH(oldCH);
+                console.log("На сегодня уже загружено актуальное расписание - ничего не обновлял");
+            };
+        }
+        else {
             setCH(oldCH);
-            storeData(oldCH);
-        } else {
-            console.log("На сегодня уже загружено актуальное расписание - ничего не обновлял");
-        };
+        }
+
     };
+
+
+
+    // const Lesson = memo(({ item, index }) => (
+    //     <SharedElement id={`item.${item.id}`}>
+    //         <Pressable style={{ marginTop: index == 0 ? responsiveHeight(6.5) : 0, marginBottom: responsiveHeight(1.5), width: responsiveWidth(90), backgroundColor: '#D9D9D9', borderRadius: 15, flexDirection: 'row' }}
+    //             onPress={() => { less = index; navigation.navigate('Detail', { item, index, css }) }}
+    //         >
+    //             <View style={{ flex: 3, alignItems: 'center', justifyContent: 'space-between', paddingTop: responsiveHeight(2.3696682), paddingBottom: responsiveHeight(2.3696682) }}>
+    //                 <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeStart}</Text>
+    //                 <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeEnd}</Text>
+    //             </View>
+    //             <View style={{ flex: 8 }}>
+    //                 <Text style={{ marginTop: responsiveHeight(1.1848341), marginLeft: responsiveWidth(1.25), marginRight: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.name}</Text>
+    //                 <Text style={{ marginTop: responsiveHeight(2.962085), marginLeft: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#656565' }}>*{item.type}</Text>
+    //                 <Text style={{ marginBottom: responsiveHeight(1.77725118), marginLeft: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#656565' }}>На занятии: {item.students.filter(x => x.isHere == true).length}{"\n"}Отсутствует: {item.students.filter(x => x.isHere == false).length}</Text>
+    //             </View>
+    //         </Pressable>
+    //     </SharedElement>
+    // ));
+    // const renderLesson = ({ item, index }) => {
+    //     return (
+    //         <Lesson item={item} index={index} />
+    //     );
+    // };
+
+
+    // const ListItem = memo(({ item }) => {
+    //     return (
+    //         <View style={{ flex: 1, width: width, alignItems: 'center' }}>
+    //             <FlatList
+    //                 data={item.lessons}
+    //                 keyExtractor={(item) => item.id}
+    //                 showsVerticalScrollIndicator={false}
+    //                 renderItem={renderLesson}
+    //             />
+    //             <View style={{ position: 'absolute', left: responsiveWidth(5), top: responsiveHeight(1), width: responsiveWidth(50), height: responsiveHeight(4), backgroundColor: 'white', borderRadius: responsiveWidth(2), justifyContent: 'center', paddingLeft: responsiveWidth(1) }}>
+    //                 <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{new Date(item.day).getDate()}.{format(new Date(item.day), 'LL')} {format(new Date(item.day), 'EEEE')}</Text>
+    //             </View>
+    //         </View>
+    //     );
+    // });
+
 
 
 
     useEffect(() => {
         async function prepare() {
             try {
+
                 await updateSchedule();
+
             } catch (e) {
                 console.warn(e);
             } finally {
@@ -403,6 +803,7 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
     const onLayoutRootView = useCallback(async () => {
         if (appIsReady) {
             await SplashScreen.hideAsync();
+            flatListRef.current.scrollToIndex({ index: selectedId, animated: true });
         }
     }, [appIsReady]);
 
@@ -410,57 +811,36 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
         return null;
     };
 
-    //
-    //
-    // ПРИВЯЗКА КОНТЕКСТА К ФУНКЦИИ (СТАЖИРОВКА) ->
-    //
-    // --> МЕТОДЫ ИТЕРАЦИИ МАССИВОВ
-    //
-    // --> CALL, APPLAY, BIND
-    //
-    // --> СМОТРЕТЬ ЗАДАНИЕ В СЛАКЕ
-    //
-    // --> //использовать синтаксис 5 экноскрипта
-    //
-    // --> 
-
 
     const { height, width } = Dimensions.get('window');
 
-
-
+    let less;
+    const css = (returnedList) => {
+        let changeble = CH.slice();
+        changeble[selectedId].lessons[less].students = returnedList;
+        setCH(changeble);
+        storeData(changeble);
+    }
 
 
     return (
         <SafeAreaView style={styles.AndroidSafeArea} onLayout={onLayoutRootView}>
             <View style={{ flex: 1, backgroundColor: '#fff' }}>
                 <View style={styles.tab_elements}>
-                    {/* <Pressable style={styles.element_of_tab} onPress={() => { send_data_to_report(); setSchedule_data(CH); OpenOffer(); }}> */}
                     <Pressable style={styles.element_of_tab} onPress={() => { setSchedule_data(CH); OpenOffer(); }}>
                         <FontAwesome name="pencil-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
                     </Pressable>
-                    {/* <Pressable style={styles.element_of_tab} onPress={() => { if (CH[selectedId].lessons.length != 0) { setDelete(!Delete) }; }}>
-                        <FontAwesome name="trash-o" size={responsiveHeight(3.9)} color="#007AFF" />
-                    </Pressable> */}
+
                     <Pressable style={styles.element_of_tab} onPress={() => navigation.navigate("Modal", { getUser: async (userLogin) => await weekForNewUser(userLogin) })}>
                         <FontAwesome name="check-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
                     </Pressable>
                 </View>
-                {/* <View style={{ flex: 1 }}>
-                    <FlatList
-                        data={date}
-                        renderItem={renderItem}
-                        keyExtractor={(index) => index.toString()}
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        extraData={selectedId}
-                    />
-                </View> */}
             </View>
             <View style={{ backgroundColor: '#f2f2f2', flex: 12 }} >
                 <FlatList
                     data={CH}
-                    keyExtractor={(item, index) => item.toString() + index.toString()}
+                    ref={flatListRef}
+                    keyExtractor={(item) => item.ID}
                     showsHorizontalScrollIndicator={false}
                     pagingEnabled
                     horizontal
@@ -468,16 +848,34 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
                         const x = e.nativeEvent.contentOffset.x;
                         setSelectedId((x / width).toFixed(0));
                     }}
+                    // renderItem={({ item, index }) => {
+                    //     return (
+                    //         <View style={{ flex: 1, width: width, alignItems: 'center' }}>
+                    //             <FlatList
+                    //                 data={item.lessons}
+                    //                 keyExtractor={(item) => item.id}
+                    //                 showsVerticalScrollIndicator={false}
+                    //                 renderItem={renderLesson}
+                    //             />
+                    //             <View style={{ position: 'absolute', left: responsiveWidth(5), top: responsiveHeight(1), width: responsiveWidth(50), height: responsiveHeight(4), backgroundColor: 'white', borderRadius: responsiveWidth(2), justifyContent: 'center', paddingLeft: responsiveWidth(1) }}>
+                    //                 <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{new Date(item.day).getDate()}.{format(new Date(item.day), 'LL')} {format(new Date(item.day), 'EEEE')}</Text>
+                    //             </View>
+                    //         </View>
+                    //     )
+                    // }}
+                    // renderItem={({ item }) => <ListItem item={item} />}
                     renderItem={({ item, index }) => {
                         return (
                             <View style={{ flex: 1, width: width, alignItems: 'center' }}>
                                 <FlatList
                                     data={item.lessons}
-                                    keyExtractor={(item, index) => index.toString()}
+                                    keyExtractor={(item) => item.id}
                                     showsVerticalScrollIndicator={false}
-                                    renderItem={({ item, index }) =>
-                                        <View style={{ marginTop: index == 0 ? responsiveHeight(6.5) : 0, marginBottom: responsiveHeight(1.5), width: responsiveWidth(90), backgroundColor: '#D9D9D9', borderRadius: 15, }}>
-                                            <Pressable style={{ flexDirection: 'row' }} onPress={() => handleVisibleModal(item.students, index)}>
+                                    renderItem={({ item, index }) => (
+                                        <SharedElement id={`item.${item.id}`}>
+                                            <Pressable style={{ marginTop: index == 0 ? responsiveHeight(6.5) : 0, marginBottom: responsiveHeight(1.5), width: responsiveWidth(90), backgroundColor: '#D9D9D9', borderRadius: 15, flexDirection: 'row' }}
+                                                onPress={() => { less = index; navigation.navigate('Detail', { item, index, css }) }}
+                                            >
                                                 <View style={{ flex: 3, alignItems: 'center', justifyContent: 'space-between', paddingTop: responsiveHeight(2.3696682), paddingBottom: responsiveHeight(2.3696682) }}>
                                                     <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeStart}</Text>
                                                     <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeEnd}</Text>
@@ -488,8 +886,8 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
                                                     <Text style={{ marginBottom: responsiveHeight(1.77725118), marginLeft: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#656565' }}>На занятии: {item.students.filter(x => x.isHere == true).length}{"\n"}Отсутствует: {item.students.filter(x => x.isHere == false).length}</Text>
                                                 </View>
                                             </Pressable>
-                                        </View>
-                                    }
+                                        </SharedElement>
+                                    )}
                                 />
                                 <View style={{ position: 'absolute', left: responsiveWidth(5), top: responsiveHeight(1), width: responsiveWidth(50), height: responsiveHeight(4), backgroundColor: 'white', borderRadius: responsiveWidth(2), justifyContent: 'center', paddingLeft: responsiveWidth(1) }}>
                                     <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{new Date(item.day).getDate()}.{format(new Date(item.day), 'LL')} {format(new Date(item.day), 'EEEE')}</Text>
@@ -498,8 +896,6 @@ function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE
                         )
                     }}
                 />
-
-
             </View>
         </SafeAreaView >
     );

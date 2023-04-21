@@ -1,4 +1,4 @@
-// [{
+<!-- // [{
 //     day: дата,
 //         lessons: [
 //             {
@@ -39,10 +39,10 @@
 //               }]
 //             }
 //         ]
-// }]
+// }] -->
 
 
-{/* <View style={{ backgroundColor: '#f2f2f2', alignItems: 'center', flex: 10 }} >
+<!-- {/* <View style={{ backgroundColor: '#f2f2f2', alignItems: 'center', flex: 10 }} >
     <FlatList
         data={CH[selectedId].lessons}
         keyExtractor={(item, index) => index.toString()}
@@ -65,4 +65,4 @@
         }
     // ListFooterComponent={Delete == false ? Footer_Component : null}
     />
-</View> */}
+</View> */} -->
