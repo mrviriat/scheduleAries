@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#2b4369',
+        backgroundColor: '#2b4369'
     },
     container: {
         position: 'absolute',
@@ -144,9 +144,7 @@ const styles = StyleSheet.create({
         width: '80%',
         height: responsiveHeight(50),
         backgroundColor: '#D9D9D9',
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        borderRadius: responsiveHeight(1.8),
+        borderRadius: responsiveHeight(1.8)
     },
     input: {
         width: 300,
@@ -156,11 +154,10 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         padding: 10,
         marginVertical: 1,
-        backgroundColor: '#ffffff90',
-        // marginBottom: 20
+        backgroundColor: '#ffffff90'
     },
     text: {
         fontFamily: 'Inter_400Regular',
-        fontSize: responsiveFontSize(2.67),
+        fontSize: responsiveFontSize(2.67)
     },
 })

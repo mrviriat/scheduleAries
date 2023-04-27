@@ -50,36 +50,6 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
     const [NewStudent, setValue] = useState(true);
     const [ChangedIndex, setChangedIndex] = useState();
 
-    // const Student = ({ item, index }) => (
-    //     <TouchableOpacity style={[styles.item,
-    //     {
-    //         borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
-    //         borderColor: 'black',
-    //         borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-    //         borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-    //         borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
-    //         borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0
-    //     }]}
-    //         onLongPress={() => dell_Srudent(index)}
-    //         delayLongPress={1000}
-    //         onPress={() => {
-    //             ref.current?.focus();
-    //             setChangedStudent(item.name);
-    //             setChangedIndex(index);
-    //             setValue(false);
-    //         }
-    //         }
-    //     >
-    //         <Text style={styles.text}>{index + 1}. </Text>
-    //         <Text style={styles.text}>{item.name} </Text>
-    //     </TouchableOpacity >
-    // );
-    // const renderStudent = ({ item, index }) => {
-    //     return (
-    //         <Student item={item} index={index} />
-    //     );
-    // };
-
     if (!fontsLoaded) {
         return null;
     };
@@ -109,8 +79,6 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                     keyExtractor={(item, index) => item.name + index.toString()}
                     showsVerticalScrollIndicator={false}
                     initialNumToRender={15}
-                    // renderItem={({ item }) => <Text>{item.name}</Text>}
-                    // estimatedItemSize={responsiveHeight(7.109)}
                     renderItem={({ item, index }) =>
                         <TouchableOpacity style={[styles.item,
                         {

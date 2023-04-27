@@ -15,9 +15,7 @@ import { FlashList } from "@shopify/flash-list";
 Text.defaultProps = Text.defaultProps || {}; //Disable dynamic type in IOS
 Text.defaultProps.allowFontScaling = false;
 
-
-// function Schedule_screen({ OpenOffer, setStudents, setLesson, OpenModal, changeE, setSchedule_data }, ref) {
-function Schedule_screen({ OpenOffer, setSchedule_data }) {
+export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
 
     const navigation = useNavigation();
 
@@ -45,44 +43,6 @@ function Schedule_screen({ OpenOffer, setSchedule_data }) {
     const [CH, setCH] = useState([]);
     const selectedId = (getDay(new Date()) + 6) % 7;
 
-    // const deleteStudentFromLesson = (bool, lessonId, studentId) => {
-    //     let changeble = CH.slice();
-    //     console.log(`ID урока: ${lessonId + 1}; ID студента: ${studentId + 1}; присутствие на паре - "${bool}"`)
-    //     changeble[selectedId].lessons[lessonId].students[studentId].isHere = bool;
-    //     changeE();
-    //     setCH(changeble);
-    //     storeData(changeble);
-    // };
-
-    // const SetDescriptionForStudent = (text, lessonId, studentId) => {
-    //     let changeble = CH.slice();
-    //     console.log(`ID урока: ${lessonId + 1}; ID студента: ${studentId + 1} - "${text}"`)
-    //     changeble[selectedId].lessons[lessonId].students[studentId].desc = text;
-    //     changeE();
-    //     setCH(changeble);
-    //     storeData(changeble);
-    // };
-
-    // const onClickHandler = async (name) => {
-    //     let st = [];
-    //     try {
-    //         const jsonValue = await AsyncStorage.getItem('@stu')
-    //         if (jsonValue != null) {
-    //             st = JSON.parse(jsonValue);
-    //             console.log('я прочитал список студентов в функции onClickHandler');
-    //         }
-    //     } catch (e) {
-    //         console.log('ошибка чтения в функции onClickHandler')
-    //     }
-    //     let changeble = CH.slice();
-    //     changeble[selectedId].lessons = [...changeble[selectedId].lessons, { name: name, students: st }];
-    //     setCH(changeble);
-    //     storeData(changeble);
-    // };
-
-    // useImperativeHandle(ref, () => ({ deleteStudentFromLesson, SetDescriptionForStudent, onClickHandler }));
-    // useImperativeHandle(ref, () => ({ deleteStudentFromLesson, SetDescriptionForStudent }));
-
     const storeData = async (value) => {
         try {
             const jsonValue = JSON.stringify(value)
@@ -104,12 +64,6 @@ function Schedule_screen({ OpenOffer, setSchedule_data }) {
             console.log(`${e} - ошибка чтения последнего сохранённого расписания в getData (function Schedule_screen)`);
         }
     };
-
-    // const handleVisibleModal = (students, index) => {
-    //     setStudents(students);
-    //     setLesson(index)
-    //     OpenModal();
-    // };
 
     const createEmpty = () => {
         let empty = [];
@@ -373,65 +327,6 @@ function Schedule_screen({ OpenOffer, setSchedule_data }) {
     const { height, width } = Dimensions.get('window');
 
     return (
-        // <SafeAreaView style={styles.AndroidSafeArea} onLayout={onLayoutRootView}>
-        //     <View style={{ flex: 1, backgroundColor: '#fff' }}>
-        //         <View style={styles.tab_elements}>
-        //             <Pressable style={styles.element_of_tab} onPress={() => { setSchedule_data(CH); OpenOffer(); }}>
-        //                 <FontAwesome name="pencil-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
-        //             </Pressable>
-
-        //             <Pressable style={styles.element_of_tab} onPress={() => navigation.navigate("Modal", { getUser: async (userLogin) => await weekForNewUser(userLogin) })}>
-        //                 <FontAwesome name="check-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
-        //             </Pressable>
-        //         </View>
-        //     </View>
-        //     <View style={{ backgroundColor: '#f2f2f2', flex: 13 }} >
-        //         <FlatList
-        //             data={CH}
-        //             ref={flatListRef}
-        //             keyExtractor={(item) => item.ID}
-        //             showsHorizontalScrollIndicator={false}
-        //             pagingEnabled
-        //             horizontal
-        //             onScroll={e => {
-        //                 const x = e.nativeEvent.contentOffset.x;
-        //                 setSelectedId((x / width).toFixed(0));
-        //             }}
-        //             renderItem={({ item, index }) => {
-        //                 return (
-        //                     <View style={{ flex: 1, width: width, alignItems: 'center' }}>
-        //                         <FlatList
-        //                             data={item.lessons}
-        //                             keyExtractor={(item) => item.id}
-        //                             showsVerticalScrollIndicator={false}
-        //                             renderItem={({ item, index }) => (
-        //                                 <SharedElement id={`item.${item.id}`}>
-        //                                     <Pressable style={{ marginTop: index == 0 ? responsiveHeight(6.5) : 0, marginBottom: responsiveHeight(1.5), width: responsiveWidth(90), backgroundColor: '#D9D9D9', borderRadius: 15, flexDirection: 'row' }}
-        //                                         onPress={() => { less = index; navigation.navigate('Detail', { item, index, css }) }}
-        //                                     >
-        //                                         <View style={{ flex: 3, alignItems: 'center', justifyContent: 'space-between', paddingTop: responsiveHeight(2.3696682), paddingBottom: responsiveHeight(2.3696682) }}>
-        //                                             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeStart}</Text>
-        //                                             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeEnd}</Text>
-        //                                         </View>
-        //                                         <View style={{ flex: 8 }}>
-        //                                             <Text style={{ marginTop: responsiveHeight(1.1848341), marginLeft: responsiveWidth(1.25), marginRight: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.name}</Text>
-        //                                             <Text style={{ marginTop: responsiveHeight(2.962085), marginLeft: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#656565' }}>*{item.type}</Text>
-        //                                             <Text style={{ marginBottom: responsiveHeight(1.77725118), marginLeft: responsiveWidth(1.25), fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#656565' }}>На занятии: {item.students.filter(x => x.isHere == true).length}{"\n"}Отсутствует: {item.students.filter(x => x.isHere == false).length}</Text>
-        //                                         </View>
-        //                                     </Pressable>
-        //                                 </SharedElement>
-        //                             )}
-        //                         />
-        //                         <View style={{ position: 'absolute', left: responsiveWidth(5), top: responsiveHeight(1), width: responsiveWidth(50), height: responsiveHeight(4), backgroundColor: 'white', borderRadius: responsiveWidth(2), justifyContent: 'center', paddingLeft: responsiveWidth(1) }}>
-        //                             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{new Date(item.day).getDate()}.{format(new Date(item.day), 'LL')} {format(new Date(item.day), 'EEEE')}</Text>
-        //                         </View>
-        //                     </View>
-        //                 )
-        //             }}
-        //         />
-        //     </View>
-        // </SafeAreaView >
-
         <View style={styles.AndroidSafeArea} onLayout={onLayoutRootView}>
             <View style={{ flex: 1, backgroundColor: '#fff' }}>
                 <View style={styles.tab_elements}>
@@ -452,12 +347,6 @@ function Schedule_screen({ OpenOffer, setSchedule_data }) {
                     showsHorizontalScrollIndicator={false}
                     pagingEnabled
                     horizontal
-                    // onScroll={e => {
-                    //     const x = e.nativeEvent.contentOffset.x;
-                    //     selectedDay = (x / width).toFixed(0);
-                    //     setSelectedId(selectedDay);
-                    //     console.log(selectedDay);
-                    // }}
                     estimatedItemSize={width}
                     renderItem={({ item, index }) => {
                         let selectedDay = index;
@@ -467,13 +356,10 @@ function Schedule_screen({ OpenOffer, setSchedule_data }) {
                                     data={item.lessons}
                                     keyExtractor={(item) => item.id}
                                     showsVerticalScrollIndicator={false}
-                                    // estimatedItemSize={200}
                                     renderItem={({ item, index }) => (
                                         <SharedElement id={`item.${item.id}`}>
                                             <Pressable style={{ marginTop: index == 0 ? responsiveHeight(6.5) : 0, marginBottom: responsiveHeight(1.5), width: responsiveWidth(90), backgroundColor: '#D9D9D9', borderRadius: 15, flexDirection: 'row' }}
                                                 onPress={() => {
-                                                    // console.log("selectedDay: " + curr);
-                                                    // selectedLesson = index;
                                                     navigation.push('Detail', { item, selectedDay, index, changePresents })
                                                 }}
                                             >
@@ -502,13 +388,7 @@ function Schedule_screen({ OpenOffer, setSchedule_data }) {
     );
 };
 
-export default forwardRef(Schedule_screen);
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: responsiveHeight(5),
-    },
     AndroidSafeArea: {
         backgroundColor: '#fff',
         flex: 1,

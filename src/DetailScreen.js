@@ -1,31 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, FlatList, TextInput, Animated, Text, Platform, StatusBar, KeyboardAvoidingView, Pressable, Alert } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native'
-import { TransitionPresets, createStackNavigator } from '@react-navigation/stack';
+import { View, StyleSheet, FlatList, Animated, Text, Platform, StatusBar, Pressable } from 'react-native';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import { LogBox } from 'react-native';
-import {
-  SharedElement,
-  createSharedElementStackNavigator,
-} from 'react-navigation-shared-element';
+import { SharedElement } from 'react-navigation-shared-element';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
-LogBox.ignoreLogs([
-  'Non-serializable values were found in the navigation state.',
-]);
 // ИКОНКИ
-import { AntDesign } from '@expo/vector-icons';
-import { FontAwesome5 } from '@expo/vector-icons';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import StudentsModal from './studentsModal';
+LogBox.ignoreLogs([
+  'Non-serializable values were found in the navigation state.',
+]);
+
 export default function DetailScreen({ route }) {
 
   let [fontsLoaded] = useFonts({
     Inter_400Regular,
   });
-
 
   const opacity = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -37,18 +28,14 @@ export default function DetailScreen({ route }) {
     }).start();
   }, []);
 
-
   const navigation = useNavigation();
   const { item, item: { students }, selectedDay, index, changePresents } = route.params;
-
 
   const [studentsList, setStudents] = useState(students);
   const [Item, setItem] = useState({ name: "", isHere: true, desc: "" });
   const [Index, setIndex] = useState(0);
 
-
   const [visible, setVisible] = useState(false);
-
 
   const [scrollEnabled, setScrollEnabled] = useState(true);
   const flatListRef = useRef(0);
@@ -58,7 +45,6 @@ export default function DetailScreen({ route }) {
   var currentOffset = 0;
   const handleScroll = (event) => {
     currentOffset = event.nativeEvent.contentOffset.y;
-    // console.log('Current offset:', currentOffset);
   };
 
 
@@ -74,8 +60,7 @@ export default function DetailScreen({ route }) {
     console.log(text);
     setStudents(changeble);
   };
-  // console.log(studentsList);
-  // console.log(students);
+
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <SharedElement id={`item.${item.id}`}>
@@ -121,10 +106,8 @@ export default function DetailScreen({ route }) {
                 deleteStudentFromLesson(!item.isHere, index)
               }}
               style={{ paddingLeft: responsiveWidth(5.55), opacity: !item.isHere ? 0.4 : 1, width: responsiveWidth(90), height: responsiveHeight(7.109), alignItems: 'flex-start', justifyContent: 'center' }}
-            // onPress={() => { setItem(item); setIndex(index); setVisible(true) }}
             >
               <Text style={styles.text}>{index + 1}. {item.name}</Text>
-              {/* <Text style={styles.text}>{item.name} </Text> */}
             </Pressable >
             {!item.isHere &&
               <Pressable onPress={() => { setItem(item); setIndex(index); setVisible(true) }} style={{ position: 'absolute', right: 0, height: responsiveHeight(7.109), width: responsiveHeight(7.109), alignItems: 'center', justifyContent: 'center' }}>
@@ -145,7 +128,6 @@ export default function DetailScreen({ route }) {
       />
     </View>
   );
-
 }
 
 const styles = StyleSheet.create({
@@ -181,6 +163,5 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9D9D9',
     alignItems: 'center',
     flexDirection: 'row',
-    // paddingLeft: responsiveWidth(5.55), //20
   }
 })
