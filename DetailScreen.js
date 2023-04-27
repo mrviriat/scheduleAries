@@ -39,7 +39,7 @@ export default function DetailScreen({ route }) {
 
 
   const navigation = useNavigation();
-  const { item, item: { students }, index, css } = route.params;
+  const { item, item: { students }, selectedDay, index, changePresents } = route.params;
 
 
   const [studentsList, setStudents] = useState(students);
@@ -79,9 +79,9 @@ export default function DetailScreen({ route }) {
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <SharedElement id={`item.${item.id}`}>
-        <Pressable style={{ width: "90%", marginTop: 40, backgroundColor: '#D9D9D9', borderRadius: 10, flexDirection: 'row' }}
-          onPress={() => { handleStopScrolling(); css(studentsList); navigation.goBack(); }}
-          >
+        <Pressable style={{ width: "90%", marginTop: responsiveHeight(5.4), backgroundColor: '#D9D9D9', borderRadius: 10, flexDirection: 'row' }}
+          onPress={() => { handleStopScrolling(); changePresents(studentsList, selectedDay, index); navigation.goBack(); }}
+        >
           <View style={{ flex: 3, alignItems: 'center', justifyContent: 'space-between', paddingTop: responsiveHeight(2.3696682), paddingBottom: responsiveHeight(2.3696682) }}>
             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeStart}</Text>
             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeEnd}</Text>
@@ -105,7 +105,7 @@ export default function DetailScreen({ route }) {
         renderItem={({ item, index }) =>
           <View style={[styles.list,
           {
-            marginTop: index == 0 ? 10  : 0,
+            marginTop: index == 0 ? 10 : 0,
             marginBottom: index == studentsList.length - 1 ? 25 : 0,
             borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
             borderColor: 'black',
@@ -115,14 +115,19 @@ export default function DetailScreen({ route }) {
             borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0
           }
           ]}>
-            <Pressable onPress={() => { !item.isHere & SetDescriptionForStudent("", index); deleteStudentFromLesson(!item.isHere, index) }} style={{ flexDirection: 'row', opacity: !item.isHere ? 0.4 : 1, width: responsiveWidth(90), height: responsiveHeight(7.109), alignItems: 'center' }}
+            <Pressable
+              onPress={() => {
+                !item.isHere & SetDescriptionForStudent("", index);
+                deleteStudentFromLesson(!item.isHere, index)
+              }}
+              style={{ paddingLeft: responsiveWidth(5.55), opacity: !item.isHere ? 0.4 : 1, width: responsiveWidth(90), height: responsiveHeight(7.109), alignItems: 'flex-start', justifyContent: 'center' }}
             // onPress={() => { setItem(item); setIndex(index); setVisible(true) }}
             >
-              <Text style={styles.text}>{index + 1}. </Text>
-              <Text style={styles.text}>{item.name} </Text>
+              <Text style={styles.text}>{index + 1}. {item.name}</Text>
+              {/* <Text style={styles.text}>{item.name} </Text> */}
             </Pressable >
             {!item.isHere &&
-              <Pressable onPress={() => { setItem(item); setIndex(index); setVisible(true) }} style={{ position: 'absolute', right: responsiveWidth(5.55) }}>
+              <Pressable onPress={() => { setItem(item); setIndex(index); setVisible(true) }} style={{ position: 'absolute', right: 0, height: responsiveHeight(7.109), width: responsiveHeight(7.109), alignItems: 'center', justifyContent: 'center' }}>
                 <MaterialCommunityIcons name="note-edit-outline" size={responsiveHeight(3.9)} color={!item.desc ? "black" : "green"} />
               </Pressable>
             }
@@ -176,6 +181,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#D9D9D9',
     alignItems: 'center',
     flexDirection: 'row',
-    paddingLeft: responsiveWidth(5.55), //20
+    // paddingLeft: responsiveWidth(5.55), //20
   }
 })

@@ -1,6 +1,6 @@
-
+import { FlashList } from "@shopify/flash-list";
 import { useState, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform , SafeAreaView, StatusBar} from 'react-native';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform, SafeAreaView, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
@@ -50,42 +50,42 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
     const [NewStudent, setValue] = useState(true);
     const [ChangedIndex, setChangedIndex] = useState();
 
-    const Student = ({ item, index }) => (
-        <TouchableOpacity style={[styles.item,
-            {
-                borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
-                borderColor: 'black',
-                borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-                borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-                borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
-                borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0
-            }]}
-                onLongPress={() => dell_Srudent(index)}
-                delayLongPress={1000}
-                onPress={() => {
-                    ref.current?.focus();
-                    setChangedStudent(item.name);
-                    setChangedIndex(index);
-                    setValue(false);
-                }
-                }
-            >
-                <Text style={styles.text}>{index + 1}. </Text>
-                <Text style={styles.text}>{item.name} </Text>
-            </TouchableOpacity >
-    );
-    const renderStudent = ({ item, index }) => {
-        return (
-            <Student item={item}  index={index} />
-        );
-    };
+    // const Student = ({ item, index }) => (
+    //     <TouchableOpacity style={[styles.item,
+    //     {
+    //         borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
+    //         borderColor: 'black',
+    //         borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+    //         borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+    //         borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
+    //         borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0
+    //     }]}
+    //         onLongPress={() => dell_Srudent(index)}
+    //         delayLongPress={1000}
+    //         onPress={() => {
+    //             ref.current?.focus();
+    //             setChangedStudent(item.name);
+    //             setChangedIndex(index);
+    //             setValue(false);
+    //         }
+    //         }
+    //     >
+    //         <Text style={styles.text}>{index + 1}. </Text>
+    //         <Text style={styles.text}>{item.name} </Text>
+    //     </TouchableOpacity >
+    // );
+    // const renderStudent = ({ item, index }) => {
+    //     return (
+    //         <Student item={item} index={index} />
+    //     );
+    // };
 
     if (!fontsLoaded) {
         return null;
     };
 
     return (
-        <SafeAreaView style={styles.AndroidSafeArea}>
+        <View style={styles.AndroidSafeArea}>
             <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
                 <Text style={[styles.text, { marginBottom: responsiveHeight(1.77) }]}>
                     Cписок учебной группы🐥
@@ -103,15 +103,42 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                     }
                 />
             </View>
-            <View style={{ flex: 15, alignItems: 'center' }} >
+            <View style={{ flex: 15, }} >
                 <FlatList
                     data={studentsList}
                     keyExtractor={(item, index) => item.name + index.toString()}
                     showsVerticalScrollIndicator={false}
-                    renderItem={renderStudent}
+                    initialNumToRender={15}
+                    // renderItem={({ item }) => <Text>{item.name}</Text>}
+                    // estimatedItemSize={responsiveHeight(7.109)}
+                    renderItem={({ item, index }) =>
+                        <TouchableOpacity style={[styles.item,
+                        {
+                            borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
+                            borderColor: 'black',
+                            borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+                            borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+                            borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
+                            borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0,
+                            marginBottom: index == studentsList.length - 1 ? responsiveWidth(2.56) : 0,
+                        }]}
+                            onLongPress={() => dell_Srudent(index)}
+                            delayLongPress={1000}
+                            onPress={() => {
+                                ref.current?.focus();
+                                setChangedStudent(item.name);
+                                setChangedIndex(index);
+                                setValue(false);
+                            }
+                            }
+                        >
+                            <Text style={styles.text}>{index + 1}. </Text>
+                            <Text style={styles.text}>{item.name} </Text>
+                        </TouchableOpacity >
+                    }
                 />
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -122,7 +149,7 @@ const styles = StyleSheet.create({
     },
     AndroidSafeArea: {
         flex: 1,
-        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : responsiveHeight(5.4)
     },
     text: {
         fontFamily: 'Inter_400Regular',
@@ -148,5 +175,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         paddingLeft: responsiveWidth(5.55), //20
+        marginHorizontal: responsiveWidth(3.846),
     }
 });

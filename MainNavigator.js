@@ -7,12 +7,11 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Schedule_screen from './schedule_screen';
 import StudentsList_screen from './studentsList_screen';
 import Report from './Report';
-import Modal from './Modal';
+// import Modal from './Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   SharedElement,
   createSharedElementStackNavigator,
-
 } from 'react-navigation-shared-element';
 import {
   responsiveHeight,
@@ -25,22 +24,18 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { FontAwesome5 } from '@expo/vector-icons';
 
-
-
-
-
 export default function MainNavigator() {
-  const childRef = useRef(null);
-  const deleteStudentFromLesson = (bool, lessonId, studentId) => {
-    if (childRef.current) {
-      childRef.current.deleteStudentFromLesson(bool, lessonId, studentId);
-    }
-  }
-  const SetDescriptionForStudent = (text, lessonId, studentId) => {
-    if (childRef.current) {
-      childRef.current.SetDescriptionForStudent(text, lessonId, studentId);
-    }
-  }
+  // const childRef = useRef(null);
+  // const deleteStudentFromLesson = (bool, lessonId, studentId) => {
+  //   if (childRef.current) {
+  //     childRef.current.deleteStudentFromLesson(bool, lessonId, studentId);
+  //   }
+  // }
+  // const SetDescriptionForStudent = (text, lessonId, studentId) => {
+  //   if (childRef.current) {
+  //     childRef.current.SetDescriptionForStudent(text, lessonId, studentId);
+  //   }
+  // }
 
   // const onClickHandler = (text) => {
   //   if (childRef.current) {
@@ -57,29 +52,26 @@ export default function MainNavigator() {
 
   const Tab = createBottomTabNavigator();
   const [visibleReport, setVisibleReport] = useState(false);
-  const [visible, setVisible] = useState(false);
+  // const [visible, setVisible] = useState(false);
 
-
-  const [Students, setStudents] = useState();
-  const [selectedLesson, setLesson] = useState();
-  const [cc, setCC] = useState(true);
+  // const [Students, setStudents] = useState();
+  // const [selectedLesson, setLesson] = useState();
+  // const [cc, setCC] = useState(true);
 
   // НЕИСПОЛЬЗУЕМЫЕ ДАННЫЕ ДЛЯ СТАРТА ДИАЛОГОВОГО ОКНА // ANDROID
   // const [startDialog, setstartDialog] = useState(false);
   // var _class;
 
+  // const ScaleVlaue = useRef(new Animated.Value(1)).current;
 
-  const ScaleVlaue = useRef(new Animated.Value(1)).current;
-
-  const SendBack = () => {
-    Animated.timing(ScaleVlaue, {
-      toValue: 0.88,
-      duration: 200,
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: true
-    }).start(console.log(ScaleVlaue));
-  }
-
+  // const SendBack = () => {
+  //   Animated.timing(ScaleVlaue, {
+  //     toValue: 0.88,
+  //     duration: 200,
+  //     easing: Easing.inOut(Easing.ease),
+  //     useNativeDriver: true
+  //   }).start(console.log(ScaleVlaue));
+  // }
 
   useEffect(() => {  //чтение данных для окна отчёта и экрана со списком студентов
     async function GetDataFromAsync() {
@@ -120,51 +112,47 @@ export default function MainNavigator() {
   const [Schedule_data, setSchedule_data] = useState(); //данные расписания для excel отчёта
   const [studentsList, setstudentsList] = useState([]); //данные для экрана со списком студентов
 
-
-
-
   return (
     <>
       <Tab.Navigator>
-          <Tab.Screen
-            name="Schedule"
-            children={() =>
-              <Schedule_screen
-                OpenOffer={() => setVisibleReport(true)}
-                setStudents={setStudents}
-                setLesson={(text) => setLesson(text)}
-                OpenModal={() => setVisible(true)}
-                changeE={() => setCC(!cc)}
-                // setstartDialog={setstartDialog}
-                setSchedule_data={setSchedule_data}
-                SendBack={SendBack}
-                ref={childRef}
-              />
-            }
-            options={{
-              headerShown: false,
-              tabBarIcon: () => {
-                return (
-                  <Ionicons name="school" size={responsiveHeight(3.9)} color="black" />
-                );
-              },
-            }}
-          />
-          <Tab.Screen
-            name="StudentsList"
-            children={() => <StudentsList_screen studentsList={studentsList} setStudents={setstudentsList} />}
-            options={{
-              headerShown: false,
-              tabBarIcon: () => {
-                return (
-                  <FontAwesome5 name="user-edit" size={responsiveHeight(3.9)} color="black" />
-                );
-              },
-            }}
-          />
-        </Tab.Navigator>
-
-      <Modal
+        <Tab.Screen
+          name="Schedule"
+          children={() =>
+            <Schedule_screen
+              OpenOffer={() => setVisibleReport(true)}
+              setSchedule_data={setSchedule_data}
+            // setStudents={setStudents}
+            // setLesson={(text) => setLesson(text)}
+            // OpenModal={() => setVisible(true)}
+            // changeE={() => setCC(!cc)}
+            // setstartDialog={setstartDialog}
+            // SendBack={SendBack}
+            // ref={childRef}
+            />
+          }
+          options={{
+            headerShown: false,
+            tabBarIcon: () => {
+              return (
+                <Ionicons name="school" size={responsiveHeight(3.9)} color="black" />
+              );
+            },
+          }}
+        />
+        <Tab.Screen
+          name="StudentsList"
+          children={() => <StudentsList_screen studentsList={studentsList} setStudents={setstudentsList}/>}
+          options={{
+            headerShown: false,
+            tabBarIcon: () => {
+              return (
+                <FontAwesome5 name="user-edit" size={responsiveHeight(3.9)} color="black" />
+              );
+            },
+          }}
+        />
+      </Tab.Navigator>
+      {/* <Modal
         visible={visible}
         options={{ type: 'slide', from: 'bottom' }}
         duration={500}
@@ -174,15 +162,15 @@ export default function MainNavigator() {
         extra={cc}
         funcfromschudle={deleteStudentFromLesson}
         SetDescriptionForStudent={SetDescriptionForStudent}
-      />
+      /> */}
       <Report
         visible={visibleReport}
         options={{ type: 'slide', from: 'bottom' }}
         duration={500}
         onClose={() => setVisibleReport(false)}
         data={Schedule_data}
-        ref={ReportRef} />
-
+        ref={ReportRef}
+      />
       {/* <Dialog.Container visible={startDialog}>
         <Dialog.Title>Enter your class</Dialog.Title>
         <Dialog.Description>
@@ -193,8 +181,6 @@ export default function MainNavigator() {
         <Dialog.Button label="Add" onPress={() => { onClickHandler(_class); setstartDialog(false); _class = ''; }} />
       </Dialog.Container> */}
     </>
-
-
   );
 }
 

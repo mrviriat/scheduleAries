@@ -224,50 +224,46 @@ function Report({ visible, options, duration, onClose, data }, ref) {
         <>
             <Animated.View pointerEvents='none' style={[styles.outerContainer, { opacity: generateBackgroundOpacity() }]} />
             <Animated.View style={[styles.container, { transform: [{ translateY: transY.current }] }]}>
-                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-                    <TouchableOpacity activeOpacity={1} onPressOut={() => { if (Editing == false) { onPress() } }} style={styles.touch_container} >
-                        <View style={styles.innerContainer}>
-                            <View style={{ flex: 6, alignItems: 'center', justifyContent: 'center' }}>
-                                <Text style={styles.text}>Excel отчёт📋</Text>
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="уч. группа (eng: POIT-211 etc.)"
-                                    defaultValue={Grop}
-                                    onChangeText={(text) => { setGrop(text); console.log(Grop) }}
-                                    onEndEditing={() => { storeData(Grop, '@num'); setEditing(false) }}
-                                    onFocus={() => setEditing(true)}
-                                    autoCapitalize='characters'
-                                />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Фамилия старосты (eng)"
-                                    defaultValue={NameOfHead}
-                                    onChangeText={(text) => { setNameOfHead(text); console.log(NameOfHead) }}
-                                    onEndEditing={() => { storeData(NameOfHead, '@head'); setEditing(false) }}
-                                    onFocus={() => setEditing(true)}
-                                    autoCapitalize={NameOfHead != "" ? "none" : "words"}
-                                />
-                                <TextInput
-                                    ref={input}
-                                    style={styles.input}
-                                    placeholder="номер уч. недели"
-                                    defaultValue={WeekNumber}
-                                    onChangeText={(text) => { setWeekNumber(text); console.log(WeekNumber) }}
-                                    onEndEditing={() => { storeData(WeekNumber, '@weeknumber'); setEditing(false) }}
-                                    onFocus={() => setEditing(true)}
-                                    autoCapitalize='none'
-                                />
-                            </View>
-                            <TouchableOpacity onPress={() => { if (Grop != "" && NameOfHead != "" && WeekNumber != "") { shareExcel(); setReady(true) } }} style={{ flex: 2, alignItems: 'center', borderTopWidth: 1, borderColor: '#007AFF' }}>
-                                <Text style={[styles.text, { marginTop: responsiveHeight(2) }]}>Сформировать отчёт</Text>
-                                {Ready == true ? <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: 'green', marginTop: Platform.OS === 'ios' ? responsiveHeight(1.5) : responsiveHeight(2.2) }}>✨Сформирован✨</Text> :
-                                    <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#FF0000', marginTop: Platform.OS === 'ios' ? responsiveHeight(1.5) : responsiveHeight(2.2) }}>Не сформирован</Text>}
-                            </TouchableOpacity>
-                            {/* <TouchableOpacity onPress={onPress} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                            <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveScreenFontSize(2.6) }}>Отправить отчёт</Text>
-                        </TouchableOpacity> */}
+                <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <TouchableOpacity activeOpacity={1} onPressOut={() => { if (Editing == false) { onPress() } }} style={styles.container} />
+                    <View style={styles.innerContainer}>
+                        <View style={{ flex: 6, alignItems: 'center', justifyContent: 'center' }}>
+                            <Text style={styles.text}>Excel отчёт📋</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="уч. группа (eng: POIT-211 etc.)"
+                                defaultValue={Grop}
+                                onChangeText={(text) => { setGrop(text); console.log(Grop) }}
+                                onEndEditing={() => { storeData(Grop, '@num'); setEditing(false) }}
+                                onFocus={() => setEditing(true)}
+                                autoCapitalize='characters'
+                            />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Фамилия старосты (eng)"
+                                defaultValue={NameOfHead}
+                                onChangeText={(text) => { setNameOfHead(text); console.log(NameOfHead) }}
+                                onEndEditing={() => { storeData(NameOfHead, '@head'); setEditing(false) }}
+                                onFocus={() => setEditing(true)}
+                                autoCapitalize={NameOfHead != "" ? "none" : "words"}
+                            />
+                            <TextInput
+                                ref={input}
+                                style={styles.input}
+                                placeholder="номер уч. недели"
+                                defaultValue={WeekNumber}
+                                onChangeText={(text) => { setWeekNumber(text); console.log(WeekNumber) }}
+                                onEndEditing={() => { storeData(WeekNumber, '@weeknumber'); setEditing(false) }}
+                                onFocus={() => setEditing(true)}
+                                autoCapitalize='none'
+                            />
                         </View>
-                    </TouchableOpacity>
+                        <TouchableOpacity onPress={() => { if (Grop != "" && NameOfHead != "" && WeekNumber != "") { shareExcel(); setReady(true) } }} style={{ flex: 2, alignItems: 'center', borderTopWidth: 1, borderColor: '#007AFF' }}>
+                            <Text style={[styles.text, { marginTop: responsiveHeight(2) }]}>Сформировать отчёт</Text>
+                            {Ready == true ? <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: 'green', marginTop: Platform.OS === 'ios' ? responsiveHeight(1.5) : responsiveHeight(2.2) }}>✨Сформирован✨</Text> :
+                                <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#FF0000', marginTop: Platform.OS === 'ios' ? responsiveHeight(1.5) : responsiveHeight(2.2) }}>Не сформирован</Text>}
+                        </TouchableOpacity>
+                    </View>
                 </KeyboardAvoidingView>
             </Animated.View>
         </>
@@ -286,14 +282,7 @@ const styles = StyleSheet.create({
     container: {
         position: 'absolute',
         width: '100%',
-        height: '100%',
-    },
-    touch_container: {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center'
+        height: '100%'
     },
     innerContainer: {
         width: '80%',

@@ -80,16 +80,16 @@ export default function StudentsModal({ visible, options, duration, onClose, ite
                                 SetDescriptionForStudent("Неуважительная", index);
                                 setTimeout(onPress, 300)
                             }}
-                                style={{ borderRadius: responsiveHeight(1.8), height: responsiveHeight(5.9), width: 100, backgroundColor: "grey", justifyContent: 'center', alignItems: 'center', }}>
-                                <Text style={styles.text}>Неуваж.</Text>
+                                style={{ borderRadius: responsiveHeight(1.8), height: responsiveHeight(5.9), width: responsiveWidth(25.64102564102564), backgroundColor: "#ff2a2a", justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={[styles.text, {color: "white"}]}>Неуваж.</Text>
                             </Pressable>
                             <Pressable onPress={() => {
                                 setDescription("Уважительная (больничный лист)");
                                 SetDescriptionForStudent("Уважительная (больничный лист)", index);
                                 setTimeout(onPress, 300)
                             }}
-                                style={{ borderRadius: responsiveHeight(1.8), marginLeft: responsiveWidth(1), height: responsiveHeight(5.9), width: 170, backgroundColor: "grey", justifyContent: 'center', alignItems: 'center', }}>
-                                <Text style={styles.text}>Уваж. (справка)</Text>
+                                style={{ borderRadius: responsiveHeight(1.8), marginLeft: responsiveWidth(1), height: responsiveHeight(5.9), width: responsiveWidth(43.58974358974359) , backgroundColor: "#5fd253", justifyContent: 'center', alignItems: 'center'}}>
+                                <Text style={[styles.text, {color: "white"}]}>Уваж. (справка)</Text>
                             </Pressable>
                         </View>
 
@@ -99,23 +99,23 @@ export default function StudentsModal({ visible, options, duration, onClose, ite
                                 SetDescriptionForStudent("Уважительная (военная кафедра)", index);
                                 setTimeout(onPress, 300)
                             }}
-                                style={{ borderRadius: responsiveHeight(1.8), height: responsiveHeight(5.9), width: 160, backgroundColor: "grey", justifyContent: 'center', alignItems: 'center', }}>
-                                <Text style={styles.text}>Военн. каф.</Text>
+                                style={{ borderRadius: responsiveHeight(1.8), height: responsiveHeight(5.9), width: responsiveWidth(41.02564102564103), backgroundColor: "#4996ff", justifyContent: 'center', alignItems: 'center', }}>
+                                <Text style={[styles.text, {color: "white"}]}>Военн. каф.</Text>
                             </Pressable>
                             <Pressable onPress={() => {
                                 setDescription("Уважительная (индивидуальный график)")
                                 SetDescriptionForStudent("Уважительная (индивидуальный график)", index);
                                 setTimeout(onPress, 300)
-                            }} style={{ borderRadius: responsiveHeight(1.8), marginLeft: responsiveWidth(1), height: responsiveHeight(5.9), width: 110, backgroundColor: "grey", justifyContent: 'center', alignItems: 'center', }}>
-                                <Text style={styles.text}>Инд. гр.</Text>
+                            }} style={{ borderRadius: responsiveHeight(1.8), marginLeft: responsiveWidth(1), height: responsiveHeight(5.9), width: responsiveWidth(28.20512820512821), backgroundColor: "#4996ff", justifyContent: 'center', alignItems: 'center', }}>
+                                <Text style={[styles.text, {color: "white"}]}>Инд. гр.</Text>
                             </Pressable>
                         </View>
                         <Pressable onPress={() => {
                             setDescription("Уважительная (заявление на имя декана)")
                             SetDescriptionForStudent("Уважительная (заявление на имя декана)", index);
                             setTimeout(onPress, 300)
-                        }} style={{ borderRadius: responsiveHeight(1.8), marginTop: responsiveHeight(1), height: responsiveHeight(5.9), width: 270 + responsiveWidth(1), backgroundColor: "grey", justifyContent: 'center', alignItems: 'center', }}>
-                            <Text style={styles.text}>Уваж. (заявл. декану)</Text>
+                        }} style={{ borderRadius: responsiveHeight(1.8), marginTop: responsiveHeight(1), height: responsiveHeight(5.9), width: responsiveWidth(69.23076923076923) + responsiveWidth(1), backgroundColor: "#5fd253", justifyContent: 'center', alignItems: 'center', }}>
+                            <Text style={[styles.text, {color: "white"}]}>Уваж. (заявл. декану)</Text>
                         </Pressable>
                     </View>
                 </View>
