@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
+
 export default function StudentsList_screen({ studentsList, setStudents }) {
 
     let [fontsLoaded] = useFonts({
@@ -73,7 +74,7 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                     }
                 />
             </View>
-            <View style={{ flex: 15, }} >
+            <View style={{ flex: 15, alignItems: "center"}} >
                 <FlatList
                     data={studentsList}
                     keyExtractor={(item, index) => item.name + index.toString()}
@@ -88,7 +89,8 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                             borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
                             borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
                             borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0,
-                            marginBottom: index == studentsList.length - 1 ? responsiveWidth(2.56) : 0,
+                            marginBottom: index == studentsList.length - 1 ? responsiveHeight(1.5) : 0,
+                            marginTop: index == 0 ? responsiveHeight(1.5) : 0,
                         }]}
                             onLongPress={() => dell_Srudent(index)}
                             delayLongPress={1000}
@@ -111,10 +113,6 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        paddingTop: responsiveHeight(5),
-    },
     AndroidSafeArea: {
         flex: 1,
         paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : responsiveHeight(5.4)
@@ -143,6 +141,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         paddingLeft: responsiveWidth(5.55), //20
-        marginHorizontal: responsiveWidth(3.846),
+        // marginHorizontal: responsiveWidth(3.846),
     }
 });
