@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Provider } from 'react-redux';
+import axios from 'axios';
 import { View, StyleSheet, TextInput, Text, Platform, StatusBar, KeyboardAvoidingView, Pressable, Alert } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native'
 import { TransitionPresets, createStackNavigator } from '@react-navigation/stack';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import { SharedElement, createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import { LogBox } from 'react-native';
 LogBox.ignoreLogs([
@@ -14,6 +15,7 @@ LogBox.ignoreLogs([
 import { AntDesign } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
 // ЭЛЕМЕНТЫ ИЗ МОИХ ФАЙЛОВ
+import { store } from './redux/redux';
 import MainNavigator from './src/MainNavigator';
 import DetailScreen from './src/DetailScreen';
 
@@ -118,43 +120,45 @@ export default function App() {
   };
 
   return (
-    <NavigationContainer>
-      <RootStack.Navigator
-        initialRouteName="MainNavigator"
-      >
-        <RootStack.Screen
-          name="MainNavigator"
-          component={MainNavigator}
-          options={{ headerShown: false }}
-        />
-        <RootStack.Screen
-          name="Detail"
-          component={DetailScreen}
-          options={{
-            gestureEnabled: false,
-            headerShown: false,
-            transitionSpec: transition.transitionSpec,
-          }}
-          sharedElements={(route, otherRoute, showing) => {
-            const { item, index } = route.params;
-            return [{ id: `item.${item.id}`, animation: 'fade' }];
-          }}
-        />
-        <RootStack.Screen
-          name="Modal"
-          component={Modal}
-          options={() => {
-            return {
+    <Provider store={store}>
+      <NavigationContainer>
+        <RootStack.Navigator
+          initialRouteName="MainNavigator"
+        >
+          <RootStack.Screen
+            name="MainNavigator"
+            component={MainNavigator}
+            options={{ headerShown: false }}
+          />
+          <RootStack.Screen
+            name="Detail"
+            component={DetailScreen}
+            options={{
+              gestureEnabled: false,
               headerShown: false,
-              gestureEnabled: true,
-              cardOverlayEnabled: true,
-              ...TransitionPresets.ModalPresentationIOS,
-            };
-          }}
-        />
+              transitionSpec: transition.transitionSpec,
+            }}
+            sharedElements={(route, otherRoute, showing) => {
+              const { item, index } = route.params;
+              return [{ id: `item.${item.id}`, animation: 'fade' }];
+            }}
+          />
+          <RootStack.Screen
+            name="Modal"
+            component={Modal}
+            options={() => {
+              return {
+                headerShown: false,
+                gestureEnabled: true,
+                cardOverlayEnabled: true,
+                ...TransitionPresets.ModalPresentationIOS,
+              };
+            }}
+          />
 
-      </RootStack.Navigator>
-    </NavigationContainer>
+        </RootStack.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }
 

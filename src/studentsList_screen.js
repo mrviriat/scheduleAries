@@ -1,15 +1,21 @@
 import { FlashList } from "@shopify/flash-list";
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform, SafeAreaView, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
-
-export default function StudentsList_screen({ studentsList, setStudents }) {
+import { useDispatch, useSelector } from "react-redux";
+// export default function StudentsList_screen({ studentsList, setStudents }) {
+export default function StudentsList_screen() {
 
     let [fontsLoaded] = useFonts({
         Inter_400Regular,
     });
+
+    const dispatch = useDispatch();
+    const studentsList = useSelector(state => state.studentsList);
+    //TODO: заменить всё взаимодействие на redux
+    //!обязательно
 
     const sell_Srudent = async (value) => {  //сохранение списка студентов в асинхронное хранилище
         try {
@@ -23,27 +29,27 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
 
     const onClickHandler = (name, index) => {  //изменение существующего студента
         console.log('измененяю существующего студента');
-        let changeble = studentsList.slice();
-        changeble[index].name = name;
-        console.log(changeble[index].name);
-        setStudents(changeble);
-        sell_Srudent(changeble);
+        let updatedStudents = [...studentsList]; // создаем копию массива
+        updatedStudents[index].name = name; // изменяем элемент массива
+        console.log(updatedStudents[index].name);
+        dispatch({ type: "GET_STUDENTS", payload: updatedStudents });
+        sell_Srudent(updatedStudents);
     };
 
     const add_Srudent = (Name) => {  //добавление нового студента
         console.log('добавляю нового студента');
-        let changeble = studentsList.slice();
-        changeble = [...changeble, { name: Name, isHere: true, desc: '' }]
-        setStudents(changeble);
-        sell_Srudent(changeble);
+        let updatedStudents = [...studentsList]; // создаем копию массива
+        updatedStudents.push({ name: Name, isHere: true, desc: '' });
+        dispatch({ type: "GET_STUDENTS", payload: updatedStudents });
+        sell_Srudent(updatedStudents);
     };
 
     const dell_Srudent = (index) => {  //удаление существующего студента
         console.log('удаляю существующего студента');
-        let changeble = studentsList.slice();
-        changeble.splice(index, 1);
-        setStudents(changeble);
-        sell_Srudent(changeble);
+        let updatedStudents = [...studentsList]; // создаем копию массива
+        updatedStudents.splice(index, 1);
+        dispatch({ type: "GET_STUDENTS", payload: updatedStudents });
+        sell_Srudent(updatedStudents);
     };
 
     const ref = useRef(null);  //работа с текстовым полем ввода
@@ -67,6 +73,7 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                     placeholder="Новый студент"
                     autoCapitalize='words'
                     defaultValue={ChangedStudent}
+
                     onChangeText={setChangedStudent}
                     onSubmitEditing={NewStudent == true ?
                         () => { add_Srudent(ChangedStudent.trim()); setChangedStudent("") } :
@@ -74,7 +81,7 @@ export default function StudentsList_screen({ studentsList, setStudents }) {
                     }
                 />
             </View>
-            <View style={{ flex: 15, alignItems: "center"}} >
+            <View style={{ flex: 15, alignItems: "center" }} >
                 <FlatList
                     data={studentsList}
                     keyExtractor={(item, index) => item.name + index.toString()}

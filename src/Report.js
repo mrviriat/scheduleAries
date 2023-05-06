@@ -10,7 +10,7 @@ import {
     responsiveScreenFontSize
 } from "react-native-responsive-dimensions";
 import { eachWeekOfInterval, eachDayOfInterval, addDays, format } from 'date-fns';
-
+import { useDispatch, useSelector } from 'react-redux';
 // FileSystem
 import * as FileSystem from 'expo-file-system';
 // ExcelJS
@@ -22,14 +22,15 @@ import { Buffer as NodeBuffer } from 'buffer';
 
 
 
-function Report({ visible, options, duration, onClose, data }, ref) {
+function Report({ visible, options, duration, onClose }, ref) {
     let [fontsLoaded] = useFonts({
         Inter_400Regular,
     });
     const { height } = Dimensions.get('screen');
     const startPointY = options?.from === 'top' ? -height : height;
     const transY = useRef(new Animated.Value(startPointY));
-
+    const data = useSelector(state => state.scheduleData);
+    
     useEffect(() => {
         if (visible) {
             startAnimation(0);
@@ -75,7 +76,6 @@ function Report({ visible, options, duration, onClose, data }, ref) {
     }
 
     const [Ready, setReady] = useState(false)
-
 
     const [Grop, setGrop] = useState("")
     const [NameOfHead, setNameOfHead] = useState("")
@@ -197,7 +197,6 @@ function Report({ visible, options, duration, onClose, data }, ref) {
             });
         });
     }
-
 
     const shareExcel = async () => {
         const shareableExcelUri = await generateShareableExcel();

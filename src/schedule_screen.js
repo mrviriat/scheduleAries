@@ -12,10 +12,11 @@ import { FontAwesome } from '@expo/vector-icons';
 import { SharedElement } from 'react-navigation-shared-element';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from "@shopify/flash-list";
+import { useDispatch, useSelector } from 'react-redux';
 Text.defaultProps = Text.defaultProps || {}; //Disable dynamic type in IOS
 Text.defaultProps.allowFontScaling = false;
 
-export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
+export default function Schedule_screen({}) {
 
     const navigation = useNavigation();
 
@@ -42,6 +43,12 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
     const [appIsReady, setAppIsReady] = useState(false);
     const [CH, setCH] = useState([]);
     const selectedId = (getDay(new Date()) + 6) % 7;
+    const dispatch = useDispatch();
+
+    const OpenOffer = () => { //!открытие окна отправки отчёта
+        dispatch({ type: "GET_SCHEDULE", payload: CH });
+        dispatch({ type: "START_REPORT", payload: true });
+    }
 
     const storeData = async (value) => {
         try {
@@ -101,7 +108,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
         try {
             const jsonValue = await AsyncStorage.getItem('@stu')
             if (jsonValue) {
-                st = JSON.parse(jsonValue);
+                st = jsonValue;
                 console.log('я прочитал студентов для обновления недели');
             }
         } catch (e) {
@@ -122,7 +129,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
                     timeStart: days[i].lessons[j].timeStart,
                     timeEnd: days[i].lessons[j].timeEnd,
                     type: days[i].lessons[j].type,
-                    students: st,
+                    students: JSON.parse(st),
                     id: `selID-${index}less-${j}`,
                 }]
             }
@@ -151,7 +158,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
         try {
             const jsonValue = await AsyncStorage.getItem('@stu')
             if (jsonValue) {
-                st = JSON.parse(jsonValue);
+                st = jsonValue;
                 console.log('я прочитал студентов для обновления недели');
             }
         } catch (e) {
@@ -172,7 +179,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
                     timeStart: days[i].lessons[j].timeStart,
                     timeEnd: days[i].lessons[j].timeEnd,
                     type: days[i].lessons[j].type,
-                    students: st,
+                    students: JSON.parse(st),
                     id: `selID-${index}less-${j}`,
                 }]
             }
@@ -201,7 +208,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
         try {
             const jsonValue = await AsyncStorage.getItem('@stu')
             if (jsonValue != null) {
-                st = JSON.parse(jsonValue);
+                st = jsonValue;
                 console.log('я прочитал студентов для обновления одного дня');
             }
         } catch (e) {
@@ -221,7 +228,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
                     timeStart: days[index].lessons[i].timeStart,
                     timeEnd: days[index].lessons[i].timeEnd,
                     type: days[index].lessons[i].type,
-                    students: st,
+                    students: JSON.parse(st),
                     id: `selID-${selectedId}less-${i}`,
                 }]
             }
@@ -263,7 +270,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
                             const jsonDay = await AsyncStorage.getItem('@lastDay');
                             let lastDay = JSON.parse(jsonDay);
                             console.log(`lastDay: ${lastDay}; selectedId: ${selectedId}`);
-                            if (lastDay != selectedId) {
+                            if (lastDay == selectedId) {
                                 console.log('захожу в getUserInfo');
                                 await getUserDay(InUser, selectedId);
                                 console.log('я обновил сегодняшний день');
@@ -330,7 +337,7 @@ export default function Schedule_screen({ OpenOffer, setSchedule_data }) {
         <View style={styles.AndroidSafeArea} onLayout={onLayoutRootView}>
             <View style={{ flex: 1, backgroundColor: '#fff' }}>
                 <View style={styles.tab_elements}>
-                    <Pressable style={styles.element_of_tab} onPress={() => { setSchedule_data(CH); OpenOffer(); }}>
+                    <Pressable style={styles.element_of_tab} onPress={OpenOffer}>
                         <FontAwesome name="pencil-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
                     </Pressable>
 

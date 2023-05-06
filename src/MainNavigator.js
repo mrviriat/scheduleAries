@@ -1,19 +1,38 @@
-import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Schedule_screen from './schedule_screen';
 import StudentsList_screen from './studentsList_screen';
 import Report from './Report';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  SharedElement,
-  createSharedElementStackNavigator,
-} from 'react-navigation-shared-element';
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import { responsiveHeight, responsiveWidth, responsiveFontSize, } from "react-native-responsive-dimensions";
 import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useDispatch, useSelector } from 'react-redux';
+
+const StackA = createSharedElementStackNavigator();
+const StackB = createSharedElementStackNavigator();
+
+const StackScreenA = () => (
+  <StackA.Navigator>
+    <StackA.Screen
+      name="A"
+      component={Schedule_screen}
+      options={{ headerShown: false }}
+    />
+  </StackA.Navigator>
+);
+
+const StackScreenB = () => (
+  <StackB.Navigator>
+    <StackB.Screen
+      name="B"
+      component={StudentsList_screen}
+      options={{ headerShown: false }}
+    />
+  </StackB.Navigator>
+);
 
 export default function MainNavigator() {
 
@@ -25,7 +44,23 @@ export default function MainNavigator() {
   }
 
   const Tab = createBottomTabNavigator();
-  const [visibleReport, setVisibleReport] = useState(false);
+  const dispatch = useDispatch();
+  const visibility = useSelector(state => state.visibleReport);
+  const CloseOffer = () => { //!закрытие окна отправки отчёта
+    dispatch({ type: "START_REPORT", payload: false });
+  }
+
+  const getValue = async () => {
+    try {
+      const jsonStudents = await AsyncStorage.getItem('@stu')
+      if (jsonStudents != null) {
+        StudentsJSON = JSON.parse(jsonStudents);
+        dispatch({ type: "GET_STUDENTS", payload: StudentsJSON });
+      }
+    } catch (e) {
+      console.log('ошибка чтения')
+    }
+  }
 
   useEffect(() => {  //чтение данных для окна отчёта и экрана со списком студентов
     async function GetDataFromAsync() {
@@ -49,13 +84,9 @@ export default function MainNavigator() {
           weeknumber = JSON.parse(jsonValue3);
           // console.log('я прочитал weeknumber');
         }
-        const jsonStudents = await AsyncStorage.getItem('@stu')
-        if (jsonStudents != null) {
-          StudentsJSON = JSON.parse(jsonStudents);
-          // console.log('я прочитал студентов');
-        }
+        await getValue(); //!чтение студентов для redux
         getDataFromGroup(head, num, weeknumber);
-        setstudentsList(StudentsJSON)
+        // setstudentsList(StudentsJSON)
       } catch (e) {
         console.log('ошибка чтения')
       }
@@ -63,20 +94,17 @@ export default function MainNavigator() {
     GetDataFromAsync();
   }, []);
 
-  const [Schedule_data, setSchedule_data] = useState(); //данные расписания для excel отчёта
-  const [studentsList, setstudentsList] = useState([]); //данные для экрана со списком студентов
-
   return (
     <>
       <Tab.Navigator>
         <Tab.Screen
           name="Schedule"
-          children={() =>
-            <Schedule_screen
-              OpenOffer={() => setVisibleReport(true)}
-              setSchedule_data={setSchedule_data}
-            />
-          }
+          component={StackScreenA}
+          // children={() =>
+          //   <Schedule_screen
+          //     setSchedule_data={setSchedule_data}
+          //   />
+          // }
           options={{
             headerShown: false,
             tabBarIcon: () => {
@@ -88,12 +116,13 @@ export default function MainNavigator() {
         />
         <Tab.Screen
           name="StudentsList"
-          children={() =>
-            <StudentsList_screen
-              studentsList={studentsList}
-              setStudents={setstudentsList}
-            />
-          }
+          component={StackScreenB}
+          // children={() =>
+          //   <StackScreenB
+          //     studentsList={studentsList}
+          //     setStudents={setstudentsList}
+          //   />
+          // }
           options={{
             headerShown: false,
             tabBarIcon: () => {
@@ -105,11 +134,10 @@ export default function MainNavigator() {
         />
       </Tab.Navigator>
       <Report
-        visible={visibleReport}
+        visible={visibility}
         options={{ type: 'slide', from: 'bottom' }}
         duration={500}
-        onClose={() => setVisibleReport(false)}
-        data={Schedule_data}
+        onClose={CloseOffer}
         ref={ReportRef}
       />
     </>
