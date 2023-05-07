@@ -1,38 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Schedule_screen from './schedule_screen';
-import StudentsList_screen from './studentsList_screen';
 import Report from './Report';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 import { responsiveHeight, responsiveWidth, responsiveFontSize, } from "react-native-responsive-dimensions";
-import { Ionicons } from '@expo/vector-icons';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';
-
-const StackA = createSharedElementStackNavigator();
-const StackB = createSharedElementStackNavigator();
-
-const StackScreenA = () => (
-  <StackA.Navigator>
-    <StackA.Screen
-      name="A"
-      component={Schedule_screen}
-      options={{ headerShown: false }}
-    />
-  </StackA.Navigator>
-);
-
-const StackScreenB = () => (
-  <StackB.Navigator>
-    <StackB.Screen
-      name="B"
-      component={StudentsList_screen}
-      options={{ headerShown: false }}
-    />
-  </StackB.Navigator>
-);
+import { StackScreenA, StackScreenB } from './Screens';
 
 export default function MainNavigator() {
 
@@ -46,7 +21,7 @@ export default function MainNavigator() {
   const Tab = createBottomTabNavigator();
   const dispatch = useDispatch();
   const visibility = useSelector(state => state.visibleReport);
-  const CloseOffer = () => { //!закрытие окна отправки отчёта
+  const CloseReport = () => { //!закрытие окна отправки отчёта
     dispatch({ type: "START_REPORT", payload: false });
   }
 
@@ -67,7 +42,6 @@ export default function MainNavigator() {
       let head = "";
       let num = "";
       let weeknumber = "";
-      let StudentsJSON = [];
       try {
         const jsonValue1 = await AsyncStorage.getItem('@head')
         if (jsonValue1 != null) {
@@ -86,7 +60,6 @@ export default function MainNavigator() {
         }
         await getValue(); //!чтение студентов для redux
         getDataFromGroup(head, num, weeknumber);
-        // setstudentsList(StudentsJSON)
       } catch (e) {
         console.log('ошибка чтения')
       }
@@ -96,40 +69,31 @@ export default function MainNavigator() {
 
   return (
     <>
-      <Tab.Navigator>
+      <Tab.Navigator
+        screenOptions={{
+          tabBarShowLabel: false,
+          tabBarActiveTintColor: "#007AFF",
+          tabBarStyle: {height: Platform.OS === "android" ? responsiveHeight(8) : responsiveHeight(9), paddingBottom: Platform.OS === "android" ? responsiveHeight(1.6) : responsiveHeight(2.5)},
+        }}
+      >
         <Tab.Screen
-          name="Schedule"
+          name="Расписание"
           component={StackScreenA}
-          // children={() =>
-          //   <Schedule_screen
-          //     setSchedule_data={setSchedule_data}
-          //   />
-          // }
           options={{
             headerShown: false,
-            tabBarIcon: () => {
-              return (
-                <Ionicons name="school" size={responsiveHeight(3.9)} color="black" />
-              );
-            },
+            tabBarIcon: ({ focused, color }) => (
+              <Feather name="clock" size={focused ? responsiveHeight(4.3) : responsiveHeight(3.9)} color={color} />
+            ),
           }}
         />
         <Tab.Screen
-          name="StudentsList"
+          name="Список студентов"
           component={StackScreenB}
-          // children={() =>
-          //   <StackScreenB
-          //     studentsList={studentsList}
-          //     setStudents={setstudentsList}
-          //   />
-          // }
           options={{
             headerShown: false,
-            tabBarIcon: () => {
-              return (
-                <FontAwesome5 name="user-edit" size={responsiveHeight(3.9)} color="black" />
-              );
-            },
+            tabBarIcon: ({ focused, color }) => (
+              <FontAwesome5 name="user-edit" size={focused ? responsiveHeight(4.3) : responsiveHeight(3.9)} color={color} />
+            ),
           }}
         />
       </Tab.Navigator>
@@ -137,7 +101,7 @@ export default function MainNavigator() {
         visible={visibility}
         options={{ type: 'slide', from: 'bottom' }}
         duration={500}
-        onClose={CloseOffer}
+        onClose={CloseReport}
         ref={ReportRef}
       />
     </>

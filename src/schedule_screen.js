@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 Text.defaultProps = Text.defaultProps || {}; //Disable dynamic type in IOS
 Text.defaultProps.allowFontScaling = false;
 
-export default function Schedule_screen({}) {
+export default function Schedule_screen({ }) {
 
     const navigation = useNavigation();
 
@@ -335,16 +335,13 @@ export default function Schedule_screen({}) {
 
     return (
         <View style={styles.AndroidSafeArea} onLayout={onLayoutRootView}>
-            <View style={{ flex: 1, backgroundColor: '#fff' }}>
-                <View style={styles.tab_elements}>
-                    <Pressable style={styles.element_of_tab} onPress={OpenOffer}>
-                        <FontAwesome name="pencil-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
-                    </Pressable>
-
-                    <Pressable style={styles.element_of_tab} onPress={() => navigation.navigate("Modal", { getUser: async (userLogin) => await weekForNewUser(userLogin) })}>
-                        <FontAwesome name="check-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
-                    </Pressable>
-                </View>
+            <View style={[styles.tab_elements, { flex: 1 }]}>
+                <Pressable style={styles.element_of_tab} onPress={OpenOffer}>
+                    <FontAwesome name="pencil-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
+                </Pressable>
+                <Pressable style={styles.element_of_tab} onPress={() => navigation.navigate("RegisterScreen", { getUser: async (userLogin) => await weekForNewUser(userLogin) })}>
+                    <FontAwesome name="check-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
+                </Pressable>
             </View>
             <View style={{ backgroundColor: '#f2f2f2', flex: 13 }} >
                 <FlashList
@@ -403,9 +400,9 @@ const styles = StyleSheet.create({
     },
     tab_elements: {
         flexDirection: 'row',
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'space-between',
+        backgroundColor: '#fff',
         paddingLeft: responsiveWidth(5),
         paddingRight: responsiveWidth(5)
     },

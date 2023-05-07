@@ -47,7 +47,6 @@ export default function DetailScreen({ route }) {
     currentOffset = event.nativeEvent.contentOffset.y;
   };
 
-
   const deleteStudentFromLesson = (bool, studentId) => {
     let changeble = studentsList.slice();
     changeble[studentId].isHere = bool;
@@ -61,11 +60,22 @@ export default function DetailScreen({ route }) {
     setStudents(changeble);
   };
 
+  const reverseStudents = () => {
+    let changeble = studentsList.slice();
+    console.log(changeble == studentsList);
+    for (let index = 0; index < changeble.length; index++) {
+      changeble[index].isHere = !changeble[index].isHere;
+    }
+    setStudents(changeble);
+  };
+
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       <SharedElement id={`item.${item.id}`}>
         <Pressable style={{ width: "90%", marginTop: responsiveHeight(5.4), backgroundColor: '#D9D9D9', borderRadius: 10, flexDirection: 'row' }}
           onPress={() => { handleStopScrolling(); changePresents(studentsList, selectedDay, index); navigation.goBack(); }}
+          onLongPress={reverseStudents}
+          delayLongPress={500}
         >
           <View style={{ flex: 3, alignItems: 'center', justifyContent: 'space-between', paddingTop: responsiveHeight(2.3696682), paddingBottom: responsiveHeight(2.3696682) }}>
             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.67) }}>{item.timeStart}</Text>

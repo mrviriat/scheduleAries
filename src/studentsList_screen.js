@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import { useDispatch, useSelector } from "react-redux";
-// export default function StudentsList_screen({ studentsList, setStudents }) {
+
 export default function StudentsList_screen() {
 
     let [fontsLoaded] = useFonts({
@@ -14,8 +14,7 @@ export default function StudentsList_screen() {
 
     const dispatch = useDispatch();
     const studentsList = useSelector(state => state.studentsList);
-    //TODO: заменить всё взаимодействие на redux
-    //!обязательно
+    //!всё радектировние списка студентов происходит через redux
 
     const sell_Srudent = async (value) => {  //сохранение списка студентов в асинхронное хранилище
         try {
@@ -100,7 +99,7 @@ export default function StudentsList_screen() {
                             marginTop: index == 0 ? responsiveHeight(1.5) : 0,
                         }]}
                             onLongPress={() => dell_Srudent(index)}
-                            delayLongPress={1000}
+                            delayLongPress={500}
                             onPress={() => {
                                 ref.current?.focus();
                                 setChangedStudent(item.name);
