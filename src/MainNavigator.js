@@ -11,13 +11,6 @@ import { StackScreenA, StackScreenB } from './Screens';
 
 export default function MainNavigator() {
 
-  // const ReportRef = useRef(null);
-  // const getDataFromGroup = (head, num, weeknumber) => {
-  //   if (ReportRef.current) {
-  //     ReportRef.current.getDataFromGroup(head, num, weeknumber);
-  //   }
-  // }
-
   const Tab = createBottomTabNavigator();
   const dispatch = useDispatch();
   const visibility = useSelector(state => state.visibleReport);
@@ -54,30 +47,6 @@ export default function MainNavigator() {
 
   useEffect(() => {  //чтение данных для окна отчёта и экрана со списком студентов
     async function GetDataFromAsync() {
-      // let head = "";
-      // let num = "";
-      // let weeknumber = "";
-      // try {
-      //   const jsonValue1 = await AsyncStorage.getItem('@head')
-      //   if (jsonValue1 != null) {
-      //     head = JSON.parse(jsonValue1);
-      //     // console.log('я прочитал head');
-      //   }
-      //   const jsonValue2 = await AsyncStorage.getItem('@num')
-      //   if (jsonValue2 != null) {
-      //     num = JSON.parse(jsonValue2);
-      //     // console.log('я прочитал num');
-      //   }
-      //   const jsonValue3 = await AsyncStorage.getItem('@weeknumber')
-      //   if (jsonValue3 != null) {
-      //     weeknumber = JSON.parse(jsonValue3);
-      //     // console.log('я прочитал weeknumber');
-      //   }
-      //   await readData(); //!чтение данных для redux
-      //   getDataFromGroup(head, num, weeknumber);
-      // } catch (e) {
-      //   console.log('ошибка чтения')
-      // }
       await readData();
     }
     GetDataFromAsync();
