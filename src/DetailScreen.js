@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, FlatList, Animated, Text, Platform, StatusBar, Pressable } from 'react-native';
+import { View, StyleSheet, Animated, Text, Platform, StatusBar, Pressable } from 'react-native';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import { LogBox } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
@@ -7,7 +7,7 @@ import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 // ИКОНКИ
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import StudentsModal from './studentsModal';
+import ReasonSelector from './ReasonSelector';
 LogBox.ignoreLogs([
   'Non-serializable values were found in the navigation state.',
 ]);
@@ -127,7 +127,7 @@ export default function DetailScreen({ route }) {
           </View>
         }
       />
-      <StudentsModal
+      <ReasonSelector
         visible={visible}
         options={{ type: 'slide', from: 'bottom' }}
         duration={500}

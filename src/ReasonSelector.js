@@ -4,7 +4,7 @@ import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import { FontAwesome } from '@expo/vector-icons';
 
-export default function StudentsModal({ visible, options, duration, onClose, item, index, SetDescriptionForStudent }) {
+export default function ReasonSelector({ visible, options, duration, onClose, item, index, SetDescriptionForStudent }) {
     let [fontsLoaded] = useFonts({
         Inter_400Regular,
     });

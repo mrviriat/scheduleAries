@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Pressable, StyleSheet, Platform, StatusBar, Text, View, FlatList, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
@@ -13,10 +13,8 @@ import { SharedElement } from 'react-navigation-shared-element';
 import { useNavigation } from '@react-navigation/native';
 import { FlashList } from "@shopify/flash-list";
 import { useDispatch, useSelector } from 'react-redux';
-Text.defaultProps = Text.defaultProps || {}; //Disable dynamic type in IOS
-Text.defaultProps.allowFontScaling = false;
 
-export default function Schedule_screen({ }) {
+export default function ScheduleScreen({ }) {
 
     const navigation = useNavigation();
 
@@ -270,7 +268,7 @@ export default function Schedule_screen({ }) {
                             const jsonDay = await AsyncStorage.getItem('@lastDay');
                             let lastDay = JSON.parse(jsonDay);
                             console.log(`lastDay: ${lastDay}; selectedId: ${selectedId}`);
-                            if (lastDay == selectedId) {
+                            if (lastDay != selectedId) {
                                 console.log('захожу в getUserInfo');
                                 await getUserDay(InUser, selectedId);
                                 console.log('я обновил сегодняшний день');

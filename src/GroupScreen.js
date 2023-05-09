@@ -1,12 +1,11 @@
-import { FlashList } from "@shopify/flash-list";
-import { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform, SafeAreaView, StatusBar } from 'react-native';
+import { useState, useRef } from 'react';
+import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import { useDispatch, useSelector } from "react-redux";
 
-export default function StudentsList_screen() {
+export default function GroupScreen() {
 
     let [fontsLoaded] = useFonts({
         Inter_400Regular,

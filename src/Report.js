@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useCallback, forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import { StyleSheet, Button, View, Dimensions, Animated, Easing, Text, SafeAreaView, TouchableOpacity, Platform, TextInput, KeyboardAvoidingView } from 'react-native'
+import { StyleSheet, View, Dimensions, Animated, Easing, Text, TouchableOpacity, Platform, TextInput, KeyboardAvoidingView } from 'react-native'
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import {
     responsiveHeight,
@@ -9,7 +8,7 @@ import {
     responsiveFontSize,
     responsiveScreenFontSize
 } from "react-native-responsive-dimensions";
-import { eachWeekOfInterval, eachDayOfInterval, addDays, format } from 'date-fns';
+import { format } from 'date-fns';
 import { useDispatch, useSelector } from 'react-redux';
 // FileSystem
 import * as FileSystem from 'expo-file-system';
@@ -20,17 +19,20 @@ import * as Sharing from 'expo-sharing';
 // From @types/node/buffer
 import { Buffer as NodeBuffer } from 'buffer';
 
-
-
-function Report({ visible, options, duration, onClose }, ref) {
+export default function Report({ visible, options, duration, onClose }) {
     let [fontsLoaded] = useFonts({
         Inter_400Regular,
     });
     const { height } = Dimensions.get('screen');
     const startPointY = options?.from === 'top' ? -height : height;
     const transY = useRef(new Animated.Value(startPointY));
+
+    const dispatch = useDispatch();
     const data = useSelector(state => state.scheduleData);
-    
+    const groupName = useSelector(state => state.groupName);
+    const headName = useSelector(state => state.headName);
+    const weekNumber = useSelector(state => state.weekNumber);
+
     useEffect(() => {
         if (visible) {
             startAnimation(0);
@@ -47,7 +49,7 @@ function Report({ visible, options, duration, onClose }, ref) {
             useNativeDriver: true
         }).start(
             () => {
-                if (Grop != "" && NameOfHead != "" && toValue == 0) {
+                if (groupName != "" && headName != "" && toValue == 0) {
                     input.current?.focus();
                 }
             }
@@ -77,27 +79,29 @@ function Report({ visible, options, duration, onClose }, ref) {
 
     const [Ready, setReady] = useState(false)
 
-    const [Grop, setGrop] = useState("")
-    const [NameOfHead, setNameOfHead] = useState("")
-    const [WeekNumber, setWeekNumber] = useState("")
-
-    const getDataFromGroup = (head, num, weeknumber) => { //передаю функцию в App.js для получения сохранённых данных
-        setGrop(num)
-        setNameOfHead(head)
-        setWeekNumber(weeknumber)
+    const editGroup = (text) => {
+        storeData(text, '@num');
+        dispatch({ type: "GET_GROUP", payload: text });
     }
-    useImperativeHandle(ref, () => ({ getDataFromGroup }));
+
+    const editHead = (text) => {
+        storeData(text, '@head');
+        dispatch({ type: "GET_HEAD", payload: text });
+    }
+
+    const editWeek = (text) => {
+        storeData(text, '@weeknumber');
+        dispatch({ type: "GET_WEEK", payload: text });
+    }
 
     const storeData = async (value, key) => {
         try {
             const jsonValue = JSON.stringify(value)
             await AsyncStorage.setItem(key, jsonValue)
-            console.log('я сохранил ' + value)
         } catch (e) {
             console.log('ошибка сохранения')
         }
     }
-
 
     const ucFirst = (string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
@@ -105,7 +109,7 @@ function Report({ visible, options, duration, onClose }, ref) {
 
     const generateShareableExcel = async () => {
         const now = new Date();
-        const fileName = `${WeekNumber}_${NameOfHead}_${Grop}.xlsx`;
+        const fileName = `${weekNumber}_${headName}_${groupName}.xlsx`;
         const fileUri = FileSystem.cacheDirectory + fileName;
         return new Promise((resolve, reject) => {
             const workbook = new ExcelJS.Workbook();
@@ -231,33 +235,40 @@ function Report({ visible, options, duration, onClose }, ref) {
                             <TextInput
                                 style={styles.input}
                                 placeholder="уч. группа (eng: POIT-211 etc.)"
-                                defaultValue={Grop}
-                                onChangeText={(text) => { setGrop(text); console.log(Grop) }}
-                                onEndEditing={() => { storeData(Grop, '@num'); setEditing(false) }}
+                                defaultValue={groupName}
+                                onChangeText={editGroup}
+                                onEndEditing={() => {
+                                    setEditing(false);
+                                }}
                                 onFocus={() => setEditing(true)}
                                 autoCapitalize='characters'
                             />
                             <TextInput
                                 style={styles.input}
                                 placeholder="Фамилия старосты (eng)"
-                                defaultValue={NameOfHead}
-                                onChangeText={(text) => { setNameOfHead(text); console.log(NameOfHead) }}
-                                onEndEditing={() => { storeData(NameOfHead, '@head'); setEditing(false) }}
+                                defaultValue={headName}
+                                onChangeText={editHead}
+                                onEndEditing={() => {
+                                    setEditing(false);
+                                }}
                                 onFocus={() => setEditing(true)}
-                                autoCapitalize={NameOfHead != "" ? "none" : "words"}
+                                autoCapitalize={headName != "" ? "none" : "words"}
+                                autoCorrect={false}
                             />
                             <TextInput
                                 ref={input}
                                 style={styles.input}
                                 placeholder="номер уч. недели"
-                                defaultValue={WeekNumber}
-                                onChangeText={(text) => { setWeekNumber(text); console.log(WeekNumber) }}
-                                onEndEditing={() => { storeData(WeekNumber, '@weeknumber'); setEditing(false) }}
+                                defaultValue={weekNumber}
+                                onChangeText={editWeek}
+                                onEndEditing={() => {
+                                    setEditing(false);
+                                }}
                                 onFocus={() => setEditing(true)}
                                 autoCapitalize='none'
                             />
                         </View>
-                        <TouchableOpacity onPress={() => { if (Grop != "" && NameOfHead != "" && WeekNumber != "") { shareExcel(); setReady(true) } }} style={{ flex: 2, alignItems: 'center', borderTopWidth: 1, borderColor: '#007AFF' }}>
+                        <TouchableOpacity onPress={() => { if (groupName != "" && headName != "" && weekNumber != "") { shareExcel(); setReady(true) } }} style={{ flex: 2, alignItems: 'center', borderTopWidth: 1, borderColor: '#007AFF' }}>
                             <Text style={[styles.text, { marginTop: responsiveHeight(2) }]}>Сформировать отчёт</Text>
                             {Ready == true ? <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: 'green', marginTop: Platform.OS === 'ios' ? responsiveHeight(1.5) : responsiveHeight(2.2) }}>✨Сформирован✨</Text> :
                                 <Text style={{ fontFamily: 'Inter_400Regular', fontSize: responsiveFontSize(2.1), color: '#FF0000', marginTop: Platform.OS === 'ios' ? responsiveHeight(1.5) : responsiveHeight(2.2) }}>Не сформирован</Text>}
@@ -269,7 +280,7 @@ function Report({ visible, options, duration, onClose }, ref) {
     )
 }
 
-export default forwardRef(Report);
+// export default forwardRef(Report);
 
 const styles = StyleSheet.create({
     outerContainer: {
