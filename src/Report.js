@@ -28,7 +28,7 @@ export default function Report({ visible, options, duration, onClose }) {
     const transY = useRef(new Animated.Value(startPointY));
 
     const dispatch = useDispatch();
-    const data = useSelector(state => state.scheduleData);
+    const data = useSelector(state => state.updateCH);
     const groupName = useSelector(state => state.groupName);
     const headName = useSelector(state => state.headName);
     const weekNumber = useSelector(state => state.weekNumber);
@@ -79,6 +79,15 @@ export default function Report({ visible, options, duration, onClose }) {
 
     const [Ready, setReady] = useState(false)
 
+    const storeData = async (value, key) => {
+        try {
+            const jsonValue = JSON.stringify(value)
+            await AsyncStorage.setItem(key, jsonValue)
+        } catch (e) {
+            console.log('ошибка сохранения')
+        }
+    }
+
     const editGroup = (text) => {
         storeData(text, '@num');
         dispatch({ type: "GET_GROUP", payload: text });
@@ -92,15 +101,6 @@ export default function Report({ visible, options, duration, onClose }) {
     const editWeek = (text) => {
         storeData(text, '@weeknumber');
         dispatch({ type: "GET_WEEK", payload: text });
-    }
-
-    const storeData = async (value, key) => {
-        try {
-            const jsonValue = JSON.stringify(value)
-            await AsyncStorage.setItem(key, jsonValue)
-        } catch (e) {
-            console.log('ошибка сохранения')
-        }
     }
 
     const ucFirst = (string) => {
@@ -218,10 +218,6 @@ export default function Report({ visible, options, duration, onClose }) {
 
     const [Editing, setEditing] = useState(false) //отслеживание, редактируются ли сейчас данные
     const input = useRef(null); //ссылка на поле с неделей
-
-    if (!fontsLoaded) {
-        return null;
-    }
 
     return (
         <>

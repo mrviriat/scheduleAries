@@ -15,7 +15,7 @@ export default function MainNavigator() {
   const dispatch = useDispatch();
   const visibility = useSelector(state => state.visibleReport);
   const CloseReport = () => { //!закрытие окна отправки отчёта
-    dispatch({ type: "START_REPORT", payload: false });
+    dispatch({ type: "CLOSE_REPORT", payload: false });
   }
 
   const readData = async () => {
@@ -87,7 +87,6 @@ export default function MainNavigator() {
         options={{ type: 'slide', from: 'bottom' }}
         duration={500}
         onClose={CloseReport}
-        // ref={ReportRef}
       />
     </>
   );

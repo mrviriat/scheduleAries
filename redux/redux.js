@@ -3,10 +3,11 @@ import { createStore } from "redux";
 const defaultSate = {
     studentsList: [],
     visibleReport: false,
-    scheduleData: [],
     groupName: "",
     headName: "",
     weekNumber: "",
+    updateCH: [],
+    isReady: false,
 }
 
 const reducer = (state = defaultSate, action) => {
@@ -19,10 +20,14 @@ const reducer = (state = defaultSate, action) => {
             return { ...state, weekNumber: action.payload };
         case "GET_STUDENTS":
             return { ...state, studentsList: action.payload };
-        case "START_REPORT":
+        case "OPEN_REPORT":
+            return { ...state, visibleReport: action.payload };
+        case "CLOSE_REPORT":
             return { ...state, visibleReport: action.payload };
         case "GET_SCHEDULE":
-            return { ...state, scheduleData: action.payload };
+            return { ...state, updateCH: action.payload };
+        case "START_SRCOOL":
+            return { ...state, isReady: true };
         default:
             return state;
     }

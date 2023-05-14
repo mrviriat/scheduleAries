@@ -14,10 +14,6 @@ LogBox.ignoreLogs([
 
 export default function DetailScreen({ route }) {
 
-  let [fontsLoaded] = useFonts({
-    Inter_400Regular,
-  });
-
   const opacity = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     Animated.timing(opacity, {

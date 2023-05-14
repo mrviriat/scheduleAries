@@ -7,10 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 
 export default function GroupScreen() {
 
-    let [fontsLoaded] = useFonts({
-        Inter_400Regular,
-    });
-
     const dispatch = useDispatch();
     const studentsList = useSelector(state => state.studentsList);
     //!всё радектировние списка студентов происходит через redux
@@ -55,10 +51,7 @@ export default function GroupScreen() {
     const [NewStudent, setValue] = useState(true);
     const [ChangedIndex, setChangedIndex] = useState();
 
-    if (!fontsLoaded) {
-        return null;
-    };
-
+    
     return (
         <View style={styles.AndroidSafeArea}>
             <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>

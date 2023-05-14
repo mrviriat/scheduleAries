@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Pressable, StyleSheet, Platform, StatusBar, Text, View, FlatList, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { eachWeekOfInterval, eachDayOfInterval, addDays, format } from 'date-fns';
 import * as SplashScreen from 'expo-splash-screen';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
@@ -20,10 +19,6 @@ export default function ScheduleScreen({ }) {
 
     const flatListRef = useRef(null);
 
-    let [fontsLoaded] = useFonts({
-        Inter_400Regular,
-    });
-
     let week = eachWeekOfInterval({
         start: new Date(),
         end: new Date(),
@@ -38,14 +33,15 @@ export default function ScheduleScreen({ }) {
         end: addDays(week[0], 6)
     });
 
-    const [appIsReady, setAppIsReady] = useState(false);
-    const [CH, setCH] = useState([]);
+    // const [appIsReady, setAppIsReady] = useState(false);
+    // const [CH, setCH] = useState([]);
     const selectedId = (getDay(new Date()) + 6) % 7;
     const dispatch = useDispatch();
+    const updateCH = useSelector(state => state.updateCH);
+    const isReady = useSelector(state => state.isReady);
 
     const OpenOffer = () => { //!открытие окна отправки отчёта
-        dispatch({ type: "GET_SCHEDULE", payload: CH });
-        dispatch({ type: "START_REPORT", payload: true });
+        dispatch({ type: "OPEN_REPORT", payload: true });
     }
 
     const storeData = async (value) => {
@@ -58,17 +54,17 @@ export default function ScheduleScreen({ }) {
         }
     };
 
-    const getData = async () => {
-        try {
-            const jsonValue = await AsyncStorage.getItem('@storage_Key');
-            let oldCH = JSON.parse(jsonValue);
-            setCH(oldCH);
-            console.log('я прочитал последнее сохранённое расписание');
-            return oldCH;
-        } catch (e) {
-            console.log(`${e} - ошибка чтения последнего сохранённого расписания в getData (function Schedule_screen)`);
-        }
-    };
+    // const getData = async () => {
+    //     try {
+    //         const jsonValue = await AsyncStorage.getItem('@storage_Key');
+    //         let oldCH = JSON.parse(jsonValue);
+    //         setCH(oldCH);
+    //         console.log('я прочитал последнее сохранённое расписание');
+    //         return oldCH;
+    //     } catch (e) {
+    //         console.log(`${e} - ошибка чтения последнего сохранённого расписания в getData (function Schedule_screen)`);
+    //     }
+    // };
 
     const createEmpty = () => {
         let empty = [];
@@ -128,211 +124,233 @@ export default function ScheduleScreen({ }) {
                     timeEnd: days[i].lessons[j].timeEnd,
                     type: days[i].lessons[j].type,
                     students: JSON.parse(st),
-                    id: `selID-${index}less-${j}`,
+                    id: generateRandomString(15),
                 }]
             }
 
             oldCH[index].lessons = changeble;
         }
 
-        setCH(JSON.parse(JSON.stringify(oldCH)));
-        storeData(oldCH);
+        dispatch({ type: "GET_SCHEDULE", payload: oldCH });
+        await storeData(oldCH);
         const jsonCurrentWeek = JSON.stringify(date);
         const jsonCurrentDay = JSON.stringify((getDay(new Date()) + 6) % 7);
-        AsyncStorage.setItem('@lastWeek', jsonCurrentWeek);
-        AsyncStorage.setItem('@lastDay', jsonCurrentDay);
-        console.log('я сохранил lastWeek и lastDay асинхронно');
-    };
+        await AsyncStorage.setItem('@lastWeek', jsonCurrentWeek);
+        await AsyncStorage.setItem('@lastDay', jsonCurrentDay);
+        console.log('я сохранил lastWeek и lastDay');
+    }; //!исправил
 
-    const getUserWeek = async (userLogin, selectedId) => { //обновление недели
-        let oldCH = createEmpty();
+    // const getUserWeek = async (userLogin, selectedId) => { //обновление недели
+    //     let oldCH = createEmpty();
 
-        let { data: { days } } = await axios.get(`http://api.grsu.by/1.x/app1/getStudent?login=${userLogin}&lang=ru_RU`)
-            .then(function (response) {
-                return axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${response.data.k_sgryp}&dateStart=${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}&dateEnd=${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}&lang=ru_RU`);
-            });
+    //     let { data: { days } } = await axios.get(`http://api.grsu.by/1.x/app1/getStudent?login=${userLogin}&lang=ru_RU`)
+    //         .then(function (response) {
+    //             return axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${response.data.k_sgryp}&dateStart=${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}&dateEnd=${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}&lang=ru_RU`);
+    //         });
 
-        let st = [];
-        try {
-            const jsonValue = await AsyncStorage.getItem('@stu')
-            if (jsonValue) {
-                st = jsonValue;
-                console.log('я прочитал студентов для обновления недели');
-            }
-        } catch (e) {
-            console.log(`${e} - (ошибка чтения @stu)`)
-        }
+    //     let st = [];
+    //     try {
+    //         const jsonValue = await AsyncStorage.getItem('@stu')
+    //         if (jsonValue) {
+    //             st = jsonValue;
+    //             console.log('я прочитал студентов для обновления недели');
+    //         }
+    //     } catch (e) {
+    //         console.log(`${e} - (ошибка чтения @stu)`)
+    //     }
 
-        for (let i = 0; i < days.length; i++) {
-            const index = oldCH.findIndex((item) => `${format(item.day, 'uuuu')}-${format(item.day, 'LL')}-${format(item.day, 'dd')}` == days[i].date);
+    //     for (let i = 0; i < days.length; i++) {
+    //         const index = oldCH.findIndex((item) => `${format(item.day, 'uuuu')}-${format(item.day, 'LL')}-${format(item.day, 'dd')}` == days[i].date);
 
-            console.log(index); // 1
+    //         console.log(index); // 1
 
-            let changeble = [];
-            days[i].lessons = days[i].lessons.filter(lesson => lesson.title != "Физическая культура");
+    //         let changeble = [];
+    //         days[i].lessons = days[i].lessons.filter(lesson => lesson.title != "Физическая культура");
 
-            for (let j = 0; j < days[i].lessons.length; j++) {
-                changeble = [...changeble, {
-                    name: days[i].lessons[j].title,
-                    timeStart: days[i].lessons[j].timeStart,
-                    timeEnd: days[i].lessons[j].timeEnd,
-                    type: days[i].lessons[j].type,
-                    students: JSON.parse(st),
-                    id: `selID-${index}less-${j}`,
-                }]
-            }
+    //         for (let j = 0; j < days[i].lessons.length; j++) {
+    //             changeble = [...changeble, {
+    //                 name: days[i].lessons[j].title,
+    //                 timeStart: days[i].lessons[j].timeStart,
+    //                 timeEnd: days[i].lessons[j].timeEnd,
+    //                 type: days[i].lessons[j].type,
+    //                 students: JSON.parse(st),
+    //                 id: `selID-${index}less-${j}`,
+    //             }]
+    //         }
 
-            oldCH[index].lessons = changeble;
-        }
+    //         oldCH[index].lessons = changeble;
+    //     }
 
-        setCH(JSON.parse(JSON.stringify(oldCH)));
-        storeData(oldCH);
-        const jsonCurrentWeek = JSON.stringify(date);
-        const jsonCurrentDay = JSON.stringify(selectedId);
-        AsyncStorage.setItem('@lastWeek', jsonCurrentWeek);
-        AsyncStorage.setItem('@lastDay', jsonCurrentDay);
-        console.log('я сохранил lastWeek и lastDay асинхронно');
-    };
+    //     setCH(JSON.parse(JSON.stringify(oldCH)));
+    //     storeData(oldCH);
+    //     const jsonCurrentWeek = JSON.stringify(date);
+    //     const jsonCurrentDay = JSON.stringify(selectedId);
+    //     AsyncStorage.setItem('@lastWeek', jsonCurrentWeek);
+    //     AsyncStorage.setItem('@lastDay', jsonCurrentDay);
+    //     console.log('я сохранил lastWeek и lastDay асинхронно');
+    // };
 
-    const getUserDay = async (userLogin, selectedId) => { //обновление одного дня
-        let oldCH = await getData();
+    // const getUserDay = async (userLogin, selectedId) => { //обновление одного дня
+    //     let oldCH = await getData();
 
-        let { data: { days } } = await axios.get(`http://api.grsu.by/1.x/app1/getStudent?login=${userLogin}&lang=ru_RU`)
-            .then(function (response) {
-                return axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${response.data.k_sgryp}&dateStart=${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}&dateEnd=${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}&lang=ru_RU`);
-            });
+    //     let { data: { days } } = await axios.get(`http://api.grsu.by/1.x/app1/getStudent?login=${userLogin}&lang=ru_RU`)
+    //         .then(function (response) {
+    //             return axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${response.data.k_sgryp}&dateStart=${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}&dateEnd=${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}&lang=ru_RU`);
+    //         });
 
-        let st = [];
-        try {
-            const jsonValue = await AsyncStorage.getItem('@stu')
-            if (jsonValue != null) {
-                st = jsonValue;
-                console.log('я прочитал студентов для обновления одного дня');
-            }
-        } catch (e) {
-            console.log('ошибка чтения')
-        }
+    //     let st = [];
+    //     try {
+    //         const jsonValue = await AsyncStorage.getItem('@stu')
+    //         if (jsonValue != null) {
+    //             st = jsonValue;
+    //             console.log('я прочитал студентов для обновления одного дня');
+    //         }
+    //     } catch (e) {
+    //         console.log('ошибка чтения')
+    //     }
 
-        const index = days.findIndex((item) => item.date == `${format(new Date(oldCH[selectedId].day), 'uuuu')}-${format(new Date(oldCH[selectedId].day), 'LL')}-${format(new Date(oldCH[selectedId].day), 'dd')}`);
+    //     const index = days.findIndex((item) => item.date == `${format(new Date(oldCH[selectedId].day), 'uuuu')}-${format(new Date(oldCH[selectedId].day), 'LL')}-${format(new Date(oldCH[selectedId].day), 'dd')}`);
 
-        if (days[index]) {
+    //     if (days[index]) {
 
-            days[index].lessons = days[index].lessons.filter(lesson => lesson.title != "Физическая культура");
-            let changeble = [];
+    //         days[index].lessons = days[index].lessons.filter(lesson => lesson.title != "Физическая культура");
+    //         let changeble = [];
 
-            for (let i = 0; i < days[index].lessons.length; i++) {
-                changeble = [...changeble, {
-                    name: days[index].lessons[i].title,
-                    timeStart: days[index].lessons[i].timeStart,
-                    timeEnd: days[index].lessons[i].timeEnd,
-                    type: days[index].lessons[i].type,
-                    students: JSON.parse(st),
-                    id: `selID-${selectedId}less-${i}`,
-                }]
-            }
+    //         for (let i = 0; i < days[index].lessons.length; i++) {
+    //             changeble = [...changeble, {
+    //                 name: days[index].lessons[i].title,
+    //                 timeStart: days[index].lessons[i].timeStart,
+    //                 timeEnd: days[index].lessons[i].timeEnd,
+    //                 type: days[index].lessons[i].type,
+    //                 students: JSON.parse(st),
+    //                 id: `selID-${selectedId}less-${i}`,
+    //             }]
+    //         }
 
-            oldCH[selectedId].lessons = changeble;
-        }
-        else {
-            console.log("Сегодня выходной");
-        }
+    //         oldCH[selectedId].lessons = changeble;
+    //     }
+    //     else {
+    //         console.log("Сегодня выходной");
+    //     }
 
-        setCH(oldCH);
-        storeData(oldCH);
+    //     setCH(oldCH);
+    //     storeData(oldCH);
 
-        try {
-            const jsonSelectedId = JSON.stringify(selectedId);
-            AsyncStorage.setItem('@lastDay', jsonSelectedId);
-            console.log('я сохранил lastDay асинхронно');
-        } catch (e) {
-            console.log(`${e} - (ошибка сохранения lastDay)`);
-        }
-    };
+    //     try {
+    //         const jsonSelectedId = JSON.stringify(selectedId);
+    //         AsyncStorage.setItem('@lastDay', jsonSelectedId);
+    //         console.log('я сохранил lastDay асинхронно');
+    //     } catch (e) {
+    //         console.log(`${e} - (ошибка сохранения lastDay)`);
+    //     }
+    // };
 
-    const updateSchedule = async () => {
-        try {
-            const jsonUser = await AsyncStorage.getItem('@InUser');
-            console.log('я прочитал InUser');
-            if (jsonUser) {
-                let selectedId = (getDay(new Date()) + 6) % 7; //выбранный день
-                let InUser = JSON.parse(jsonUser);
-                try {
-                    const jsonValue = await AsyncStorage.getItem('@lastWeek');
-                    console.log('я прочитал lastWeek');
-                    if (!isEqual(new Date(JSON.parse(jsonValue)[0]), date[0])) {
-                        await getUserWeek(InUser, selectedId);
-                        console.log('я обновил всю неделю');
-                    } else {
-                        console.log('Я уже обновлял эту неделю');
-                        try {
-                            const jsonDay = await AsyncStorage.getItem('@lastDay');
-                            let lastDay = JSON.parse(jsonDay);
-                            console.log(`lastDay: ${lastDay}; selectedId: ${selectedId}`);
-                            if (lastDay != selectedId) {
-                                console.log('захожу в getUserInfo');
-                                await getUserDay(InUser, selectedId);
-                                console.log('я обновил сегодняшний день');
-                            }
-                            else {
-                                console.log('Я уже обновлял сегодняшний день');
-                                let copy = await getData();
-                                await storeData(copy);
-                            }
-                        } catch (e) {
-                            console.log(`${e} - (ошибка чтения lastDay)`);
-                        }
-                    }
-                } catch (e) {
-                    console.log('ошибка чтения lastWeek')
-                }
-            } else {
-                console.log("юзер не вошёл");
-                setCH(createEmpty()); // создаю пустой шабблон
-            }
-        } catch (e) {
-            console.log(`${e} - (ошибка чтения InUser)`)
-        }
-    };
+    // const updateSchedule = async () => {
+    //     try {
+    //         const jsonUser = await AsyncStorage.getItem('@InUser');
+    //         console.log('я прочитал InUser');
+    //         if (jsonUser) {
+    //             let selectedId = (getDay(new Date()) + 6) % 7; //выбранный день
+    //             let InUser = JSON.parse(jsonUser);
+    //             try {
+    //                 const jsonValue = await AsyncStorage.getItem('@lastWeek');
+    //                 console.log('я прочитал lastWeek');
+    //                 if (isEqual(new Date(JSON.parse(jsonValue)[0]), date[0])) {
+    //                     await getUserWeek(InUser, selectedId);
+    //                     console.log('я обновил всю неделю');
+    //                 } else {
+    //                     console.log('Я уже обновлял эту неделю');
+    //                     try {
+    //                         const jsonDay = await AsyncStorage.getItem('@lastDay');
+    //                         let lastDay = JSON.parse(jsonDay);
+    //                         console.log(`lastDay: ${lastDay}; selectedId: ${selectedId}`);
+    //                         if (lastDay != selectedId) {
+    //                             console.log('захожу в getUserInfo');
+    //                             await getUserDay(InUser, selectedId);
+    //                             console.log('я обновил сегодняшний день');
+    //                         }
+    //                         else {
+    //                             console.log('Я уже обновлял сегодняшний день');
+    //                             // let copy = await getData();
+    //                             // await storeData(copy);
+    //                             await getData();
+    //                         }
+    //                     } catch (e) {
+    //                         console.log(`${e} - (ошибка чтения lastDay)`);
+    //                     }
+    //                 }
+    //             } catch (e) {
+    //                 console.log('ошибка чтения lastWeek')
+    //             }
+    //         } else {
+    //             console.log("юзер не вошёл");
+    //             setCH(createEmpty()); // создаю пустой шабблон
+    //         }
+    //     } catch (e) {
+    //         console.log(`${e} - (ошибка чтения InUser)`)
+    //     }
+    // };
 
     const changePresents = (returnedList, selectedDay, selectedLesson) => {
         console.log(`selectedDay: ${selectedDay}; selectedLesson: ${selectedLesson}`);
-        let changeble = CH.slice();
+        let changeble = updateCH.slice();
         changeble[selectedDay].lessons[selectedLesson].students = returnedList;
-        setCH(changeble);
+        dispatch({ type: "GET_SCHEDULE", payload: changeble });
         storeData(changeble);
-    }
+        // setCH(changeble);
+        // storeData(changeble);
+    } //!исправил
 
-    useEffect(() => {
-        async function prepare() {
-            try {
-                await updateSchedule();
-                // console.log(generateRandomString(25));
-                // console.log(generateRandomString(25));
-                // console.log(generateRandomString(25));
-            } catch (e) {
-                console.warn(e);
-            } finally {
-                setAppIsReady(true);
-            }
-        }
-        prepare();
-    }, []);
+    // useEffect(() => {
+    //     async function prepare() {
+    //         try {
+    //             await updateSchedule();
+    //             // console.log(generateRandomString(25));
+    //             // console.log(generateRandomString(25));
+    //             // console.log(generateRandomString(25));
+    //         } catch (e) {
+    //             console.warn(e);
+    //         } finally {
+    //             // console.log("начинаю опускать splash sceen");
+    //             // setAppIsReady(true);
+    //         }
+    //     }
+    //     prepare();
+    // }, []);
+
+    // const onLayoutRootView = useCallback(async () => {
+    //     if (appIsReady) {
+    //         await SplashScreen.hideAsync();
+    //         flatListRef.current.scrollToIndex({ index: selectedId, animated: true });
+    //     }
+    // }, [appIsReady]);
+
+    // if (!appIsReady || !fontsLoaded) {
+    //     return null;
+    // };
+
+    // useEffect(() => {
+    //     function prepare() {
+    //         if (isReady) {
+    //             console.log(isReady);
+    //             flatListRef.current.scrollToIndex({ index: selectedId, animated: true });
+    //             console.log(1);
+    //         }
+    //     }
+    //     prepare();
+    // }, [isReady]);
 
     const onLayoutRootView = useCallback(async () => {
-        if (appIsReady) {
-            await SplashScreen.hideAsync();
+        if (isReady) {
             flatListRef.current.scrollToIndex({ index: selectedId, animated: true });
         }
-    }, [appIsReady]);
-
-    if (!appIsReady || !fontsLoaded) {
-        return null;
-    };
+    }, [isReady]);
 
     const { height, width } = Dimensions.get('window');
 
     return (
         <View style={styles.AndroidSafeArea} onLayout={onLayoutRootView}>
+            {/* <View style={styles.AndroidSafeArea}> */}
             <View style={[styles.tab_elements, { flex: 1 }]}>
                 <Pressable style={styles.element_of_tab} onPress={OpenOffer}>
                     <FontAwesome name="pencil-square-o" size={responsiveHeight(3.9)} color="#007AFF" />
@@ -342,14 +360,19 @@ export default function ScheduleScreen({ }) {
                 </Pressable>
             </View>
             <View style={{ backgroundColor: '#f2f2f2', flex: 13 }} >
-                <FlashList
-                    data={CH}
+                <FlatList
+                    // data={CH}
+                    data={updateCH}
                     ref={flatListRef}
                     keyExtractor={(item) => item.ID}
                     showsHorizontalScrollIndicator={false}
                     pagingEnabled
                     horizontal
-                    estimatedItemSize={width}
+                    // initialNumToRender={selectedId}
+                    getItemLayout={(data, index) => (
+                        { length: width, offset: width * index, index }
+                    )}
+                    // initialScrollIndex={3}
                     renderItem={({ item, index }) => {
                         let selectedDay = index;
                         return (
