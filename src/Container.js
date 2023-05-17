@@ -16,6 +16,7 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Feather from '@expo/vector-icons/Feather';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Font from 'expo-font';
+import { generateRandomString, createEmpty, storeData } from './Modules';
 
 const RootStack = createSharedElementStackNavigator();
 
@@ -42,8 +43,6 @@ export default function Container() {
         }
     };
 
-    //!ОТСЮДА НАЧАЛ ВСТАВЛЯТЬ ФУНКЦИИ
-
     let week = eachWeekOfInterval({
         start: new Date(),
         end: new Date(),
@@ -58,16 +57,6 @@ export default function Container() {
         end: addDays(week[0], 6)
     });
 
-    const storeData = async (value) => {
-        try {
-            const jsonValue = JSON.stringify(value);
-            await AsyncStorage.setItem('@storage_Key', jsonValue);
-            console.log('я сохранил всё расписание');
-        } catch (e) {
-            console.log('ошибка сохранения в storeData (function Schedule_screen)')
-        }
-    };
-
     const getData = async () => {
         try {
             const jsonValue = await AsyncStorage.getItem('@storage_Key');
@@ -79,38 +68,18 @@ export default function Container() {
         }
     };
 
-    const generateRandomString = (length) => {
-        const characters =
-            '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%&()_+|}{[]:?></-=';
-        let result = '';
-        const charactersLength = characters.length;
-
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-
-        return result;
-    }
-
-    const createEmpty = () => {
-        let empty = [];
-        for (let i = 0; i < 7; i++) {
-            let changeble = {
-                day: date[i],
-                lessons: [],
-                ID: generateRandomString(15),
-            }
-            empty = [...empty, changeble]
-        }
-        return empty;
-    };
-
     const getUserWeek = async (userLogin, selectedId) => { //обновление недели
-        let oldCH = createEmpty();
+        let oldCH = createEmpty(date);
+
+        let dateStart = `${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}`;
+        let dateEnd = `${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}`;
+
+        // let dateStart = "08.05.2023";
+        // let dateEnd = "14.05.2023";
 
         let { data: { days } } = await axios.get(`http://api.grsu.by/1.x/app1/getStudent?login=${userLogin}&lang=ru_RU`)
             .then(function (response) {
-                return axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${response.data.k_sgryp}&dateStart=${format(date[0], 'dd')}.${format(date[0], 'LL')}.${format(date[0], 'uuuu')}&dateEnd=${format(date[5], 'dd')}.${format(date[5], 'LL')}.${format(date[5], 'uuuu')}&lang=ru_RU`);
+                return axios.get(`http://api.grsu.by/1.x/app1/getGroupSchedule?groupId=${response.data.k_sgryp}&dateStart=${dateStart}&dateEnd=${dateEnd}&lang=ru_RU`);
             });
 
         let st = [];
@@ -135,15 +104,24 @@ export default function Container() {
             days[i].lessons = days[i].lessons.filter(lesson => lesson.title != "Физическая культура");
 
             for (let j = 0; j < days[i].lessons.length; j++) {
+                let group = JSON.parse(st);
+                if (days[i].lessons[j].subgroup.title) {
+                    if (days[i].lessons[j].subgroup.title.slice(-1) == 1) {
+                        group = group.filter(student => student.flag == 1);
+                    } else {
+                        group = group.filter(student => student.flag == 2);
+                    }
+                }
                 changeble = [...changeble, {
                     name: days[i].lessons[j].title,
                     timeStart: days[i].lessons[j].timeStart,
                     timeEnd: days[i].lessons[j].timeEnd,
                     type: days[i].lessons[j].type,
-                    students: JSON.parse(st),
+                    students: group,
                     id: generateRandomString(15),
                 }]
             }
+
             oldCH[index].lessons = changeble;
         }
 
@@ -183,12 +161,20 @@ export default function Container() {
             let changeble = [];
 
             for (let i = 0; i < days[index].lessons.length; i++) {
+                let group = JSON.parse(st);
+                if (days[index].lessons[i].subgroup.title) {
+                    if (days[index].lessons[i].subgroup.title.slice(-1) == 1) {
+                        group = group.filter(student => student.flag == 1);
+                    } else {
+                        group = group.filter(student => student.flag == 2);
+                    }
+                }
                 changeble = [...changeble, {
                     name: days[index].lessons[i].title,
                     timeStart: days[index].lessons[i].timeStart,
                     timeEnd: days[index].lessons[i].timeEnd,
                     type: days[index].lessons[i].type,
-                    students: JSON.parse(st),
+                    students: group,
                     id: generateRandomString(15),
                 }]
             }
@@ -248,7 +234,7 @@ export default function Container() {
                 }
             } else {
                 console.log("юзер не вошёл");
-                let empty = createEmpty();
+                let empty = createEmpty(date);
                 dispatch({ type: "GET_SCHEDULE", payload: empty }); //создаю постой шаблон
             }
         } catch (e) {

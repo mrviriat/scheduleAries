@@ -1,9 +1,22 @@
-import { useState, useRef } from 'react';
-import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { useState, useRef, useCallback } from 'react';
+import { StyleSheet, Dimensions, Text, View, TextInput, FlatList, TouchableOpacity, Platform, StatusBar, Pressable } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import { useDispatch, useSelector } from "react-redux";
+import Student from './Student';
+
+import {
+    PanGestureHandler,
+    PanGestureHandlerGestureEvent,
+    PanGestureHandlerProps,
+} from 'react-native-gesture-handler';
+import Animated, {
+    runOnJS,
+    useAnimatedGestureHandler,
+    useAnimatedStyle,
+    useSharedValue,
+    withTiming,
+} from 'react-native-reanimated';
 
 export default function GroupScreen() {
 
@@ -51,7 +64,20 @@ export default function GroupScreen() {
     const [NewStudent, setValue] = useState(true);
     const [ChangedIndex, setChangedIndex] = useState();
 
-    
+    const handlePress = (item, index) => {
+        ref.current?.focus();
+        setChangedStudent(item.name);
+        setChangedIndex(index);
+        setValue(false);
+    };
+
+    const onDismiss = useCallback((index, flag) => {
+        let updatedStudents = [...studentsList]; // создаем копию массива
+        updatedStudents[index].flag = flag; // изменяем элемент массива
+        dispatch({ type: "GET_STUDENTS", payload: updatedStudents });
+        sell_Srudent(updatedStudents);
+      }, []);
+
     return (
         <View style={styles.AndroidSafeArea}>
             <View style={{ flex: 3, justifyContent: "center", alignItems: "center" }}>
@@ -72,37 +98,75 @@ export default function GroupScreen() {
                     }
                 />
             </View>
-            <View style={{ flex: 15, alignItems: "center" }} >
+            <View style={{ flex: 15, /*alignItems: "center"*/ }} >
                 <FlatList
                     data={studentsList}
                     keyExtractor={(item, index) => item.name + index.toString()}
                     showsVerticalScrollIndicator={false}
                     initialNumToRender={15}
                     renderItem={({ item, index }) =>
-                        <TouchableOpacity style={[styles.item,
-                        {
-                            borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
-                            borderColor: 'black',
-                            borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-                            borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
-                            borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
-                            borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0,
-                            marginBottom: index == studentsList.length - 1 ? responsiveHeight(1.5) : 0,
-                            marginTop: index == 0 ? responsiveHeight(1.5) : 0,
-                        }]}
-                            onLongPress={() => dell_Srudent(index)}
-                            delayLongPress={500}
-                            onPress={() => {
-                                ref.current?.focus();
-                                setChangedStudent(item.name);
-                                setChangedIndex(index);
-                                setValue(false);
-                            }
-                            }
-                        >
-                            <Text style={styles.text}>{index + 1}. </Text>
-                            <Text style={styles.text}>{item.name} </Text>
-                        </TouchableOpacity >
+                        <Student
+                            item={item}
+                            index={index}
+                            studentsList={studentsList}
+                            handlePress={handlePress}
+                            handleLongPress={dell_Srudent}
+                            onDismiss={onDismiss}
+                        />
+                        // {
+                        //     const translateX = useSharedValue(0);
+                        //     const panGesture = useAnimatedGestureHandler({
+                        //         onActive: (event) => {
+                        //             translateX.value = event.translationX;
+                        //         },
+                        //         onEnd: () => {
+                        //             //   const shouldBeTwo = translateX.value < -TRANSLATE_X_THRESHOLD;
+                        //             //   const shouldBeOne = translateX.value > TRANSLATE_X_THRESHOLD;
+                        //             //   if (shouldBeTwo) {
+                        //             //     runOnJS(onDismiss)(task, 2);
+                        //             //   } else if (shouldBeOne) {
+                        //             //     runOnJS(onDismiss)(task, 1);
+                        //             //   }
+                        //             translateX.value = withTiming(0);
+                        //         },
+                        //     });
+
+                        //     const rStyle = useAnimatedStyle(() => ({
+                        //         transform: [
+                        //             {
+                        //                 translateX: translateX.value,
+                        //             },
+                        //         ],
+                        //     }));
+                        //     return (
+                        //         <PanGestureHandler onGestureEvent={panGesture}>
+                        //             <Animated.TouchableOpacity style={[styles.item, rStyle,
+                        //             {
+                        //                 borderBottomWidth: index != studentsList.length - 1 ? responsiveHeight(0.1185) : 0,
+                        //                 borderColor: 'black',
+                        //                 borderBottomLeftRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+                        //                 borderBottomRightRadius: index == studentsList.length - 1 ? responsiveHeight(0.5924) : 0,
+                        //                 borderTopLeftRadius: index == 0 ? responsiveHeight(0.5924) : 0,
+                        //                 borderTopRightRadius: index == 0 ? responsiveHeight(0.5924) : 0,
+                        //                 marginBottom: index == studentsList.length - 1 ? responsiveHeight(1.5) : 0,
+                        //                 marginTop: index == 0 ? responsiveHeight(1.5) : 0,
+                        //             }]}
+                        //                 onLongPress={() => dell_Srudent(index)}
+                        //                 delayLongPress={500}
+                        //                 onPress={() => {
+                        //                     ref.current?.focus();
+                        //                     setChangedStudent(item.name);
+                        //                     setChangedIndex(index);
+                        //                     setValue(false);
+                        //                 }
+                        //                 }
+                        //             >
+                        //                 <Text style={styles.text}>{index + 1}. </Text>
+                        //                 <Text style={styles.text}>{item.name} </Text>
+                        //             </Animated.TouchableOpacity >
+                        //         </PanGestureHandler>
+                        //     );
+                        // }
                     }
                 />
             </View>
@@ -140,5 +204,5 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingLeft: responsiveWidth(5.55), //20
         // marginHorizontal: responsiveWidth(3.846),
-    }
+    },
 });

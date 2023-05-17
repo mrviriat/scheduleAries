@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, Text, Platform, StatusBar, KeyboardAvoidingView, Pressable, Alert } from 'react-native';
+import { View, StyleSheet, TextInput, Text, Platform, StatusBar, Pressable, Alert } from 'react-native';
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -84,26 +84,25 @@ export default function RegisterScreen({ route, navigation }) {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    input: {
-      width: responsiveWidth(75), //360
-      height: responsiveHeight(7.109), //60
-      borderBottomLeftRadius: responsiveHeight(0.5924), //5
-      borderTopRightRadius: responsiveHeight(0.5924), //5
-      borderBottomWidth: responsiveHeight(0.237), //2
-      borderLeftWidth: responsiveHeight(0.237), //2
-      padding: responsiveWidth(2.56), //10
-      borderColor: 'grey',
-      backgroundColor: '#ffffff90',
-      fontFamily: 'Inter_400Regular',
-      fontSize: responsiveFontSize(2.1)
-    },
-    AndroidSafeArea: {
-      flex: 1,
-      backgroundColor: "white",
-      paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
-    },
-  })
-  
+  container: {
+    flex: 1,
+  },
+  input: {
+    width: responsiveWidth(75), //360
+    height: responsiveHeight(7.109), //60
+    borderBottomLeftRadius: responsiveHeight(0.5924), //5
+    borderTopRightRadius: responsiveHeight(0.5924), //5
+    borderBottomWidth: responsiveHeight(0.237), //2
+    borderLeftWidth: responsiveHeight(0.237), //2
+    padding: responsiveWidth(2.56), //10
+    borderColor: 'grey',
+    backgroundColor: '#ffffff90',
+    fontFamily: 'Inter_400Regular',
+    fontSize: responsiveFontSize(2.1)
+  },
+  AndroidSafeArea: {
+    flex: 1,
+    backgroundColor: "white",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0
+  },
+})

@@ -5,8 +5,7 @@ import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import {
     responsiveHeight,
     responsiveWidth,
-    responsiveFontSize,
-    responsiveScreenFontSize
+    responsiveFontSize
 } from "react-native-responsive-dimensions";
 import { format } from 'date-fns';
 import { useDispatch, useSelector } from 'react-redux';

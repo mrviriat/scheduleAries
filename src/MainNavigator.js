@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Platform } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Report from './Report';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { responsiveHeight, responsiveWidth, responsiveFontSize, } from "react-native-responsive-dimensions";
+import { responsiveHeight } from "react-native-responsive-dimensions";
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Feather } from '@expo/vector-icons';
 import { useDispatch, useSelector } from 'react-redux';

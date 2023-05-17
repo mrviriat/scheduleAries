@@ -3,7 +3,6 @@ import { View, StyleSheet, Animated, Text, Platform, StatusBar, Pressable } from
 import { responsiveHeight, responsiveWidth, responsiveFontSize } from "react-native-responsive-dimensions";
 import { LogBox } from 'react-native';
 import { SharedElement } from 'react-navigation-shared-element';
-import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 // ИКОНКИ
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';

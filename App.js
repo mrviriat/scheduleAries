@@ -4,6 +4,7 @@ import { Text } from 'react-native';
 import { LogBox } from 'react-native';
 import { useFonts, Inter_400Regular } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 // ЭЛЕМЕНТЫ ИЗ МОИХ ФАЙЛОВ
 import { store } from './redux/redux';
 import Container from './src/Container';
@@ -25,7 +26,9 @@ export default function App() {
 
   return (
     <Provider store={store}>
-      <Container />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Container />
+      </GestureHandlerRootView>
     </Provider>
   );
 };
